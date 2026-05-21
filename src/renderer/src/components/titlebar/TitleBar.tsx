@@ -1,8 +1,7 @@
 import { WindowControls } from './WindowControls'
 import { MenuBar } from './MenuBar'
 import { useSettingsStore } from '../../stores/settingsStore'
-import logoLight from '../../assets/logo-light.png'
-import logoDark from '../../assets/logo-dark.jpg'
+import logo from '../../assets/logo.png'
 
 /**
  * TitleBar
@@ -12,9 +11,6 @@ import logoDark from '../../assets/logo-dark.jpg'
  */
 export function TitleBar(): React.JSX.Element {
   const toggleSettings = useSettingsStore((state) => state.toggleSettings)
-  const theme = useSettingsStore((state) => state.theme)
-
-  const logoUrl = theme.includes('light') ? logoLight : logoDark
 
   return (
     <div
@@ -27,7 +23,7 @@ export function TitleBar(): React.JSX.Element {
           title="Settings"
           className="flex items-center h-full px-3 text-sm font-semibold text-[var(--m-fg-primary)] hover:bg-[var(--m-hover-bg)] cursor-pointer no-drag transition-colors"
         >
-          <img src={logoUrl} alt="Mirage Logo" className="w-4 h-4 mr-2 object-contain" />
+          <img src={logo} alt="Mirage Logo" className="w-5 h-5 mr-2 object-contain" />
           Mirage
         </div>
 

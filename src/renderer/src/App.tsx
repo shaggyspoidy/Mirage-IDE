@@ -33,7 +33,7 @@ function Resizer({
       setIsDragging(false)
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseup', handleMouseUp)
-      document.body.style.cursor = 'default'
+      document.body.style.cursor = ''
     }
 
     window.addEventListener('mousemove', handleMouseMove)
