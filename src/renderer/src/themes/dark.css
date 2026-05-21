@@ -1,0 +1,61 @@
+/**
+ * Dark Theme — a neutral, VS Code-inspired dark palette.
+ * 
+ * WHY a separate dark theme when Catppuccin is already dark:
+ * Catppuccin's warm tones aren't for everyone. This provides a cooler,
+ * more neutral alternative that feels familiar to VS Code users.
+ */
+[data-theme="dark"] {
+  --m-bg-primary: #1a1a2e;
+  --m-bg-secondary: #16162a;
+  --m-bg-tertiary: #0f0f1a;
+  --m-bg-surface: #2a2a40;
+  --m-bg-overlay: #3a3a55;
+
+  --m-fg-primary: #e0e0e8;
+  --m-fg-secondary: #c8c8d4;
+  --m-fg-muted: #7a7a90;
+  --m-fg-subtle: #5a5a70;
+
+  --m-border-primary: #2a2a40;
+  --m-border-secondary: #3a3a55;
+  --m-border-accent: #6c8eef;
+
+  --m-accent-blue: #6c8eef;
+  --m-accent-green: #7dd4a0;
+  --m-accent-red: #e06080;
+  --m-accent-yellow: #e0c060;
+  --m-accent-purple: #b080e0;
+  --m-accent-pink: #e080c0;
+  --m-accent-teal: #60d0c0;
+  --m-accent-peach: #e0a060;
+
+  --m-hover-bg: #2a2a40;
+  --m-active-bg: #3a3a55;
+  --m-focus-ring: #6c8eef;
+
+  --m-titlebar-bg: #16162a;
+  --m-titlebar-fg: #e0e0e8;
+  --m-titlebar-btn-hover: #2a2a40;
+  --m-titlebar-btn-close-hover: #e06080;
+
+  --m-term-bg: #1a1a2e;
+  --m-term-fg: #e0e0e8;
+  --m-term-cursor: #e0e0e8;
+  --m-term-selection: #3a3a5566;
+  --m-term-black: #3a3a55;
+  --m-term-red: #e06080;
+  --m-term-green: #7dd4a0;
+  --m-term-yellow: #e0c060;
+  --m-term-blue: #6c8eef;
+  --m-term-magenta: #e080c0;
+  --m-term-cyan: #60d0c0;
+  --m-term-white: #c8c8d4;
+
+  --m-scrollbar-thumb: #3a3a55;
+  --m-scrollbar-track: #1a1a2e;
+
+  --m-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --m-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --m-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.6);
+}

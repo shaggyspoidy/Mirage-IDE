@@ -1,0 +1,58 @@
+/**
+ * One Dark Pro — Inspired by Atom's iconic One Dark theme.
+ */
+[data-theme="one-dark-pro"] {
+  --m-bg-primary: #282c34;
+  --m-bg-secondary: #21252b;
+  --m-bg-tertiary: #1e2227;
+  --m-bg-surface: #3b4048;
+  --m-bg-overlay: #4b5263;
+
+  --m-fg-primary: #abb2bf;
+  --m-fg-secondary: #c8ccd4;
+  --m-fg-muted: #5c6370;
+  --m-fg-subtle: #3e4451;
+
+  --m-border-primary: #3b4048;
+  --m-border-secondary: #4b5263;
+  --m-border-accent: #61afef;
+
+  /* One Dark accents */
+  --m-accent-blue: #61afef;
+  --m-accent-green: #98c379;
+  --m-accent-red: #e06c75;
+  --m-accent-yellow: #e5c07b;
+  --m-accent-purple: #c678dd;
+  --m-accent-pink: #e06c75;
+  --m-accent-teal: #56b6c2;
+  --m-accent-peach: #d19a66;
+
+  --m-hover-bg: #3b4048;
+  --m-active-bg: #4b5263;
+  --m-focus-ring: #61afef;
+
+  --m-titlebar-bg: #21252b;
+  --m-titlebar-fg: #abb2bf;
+  --m-titlebar-btn-hover: #3b4048;
+  --m-titlebar-btn-close-hover: #e06c75;
+
+  --m-term-bg: #282c34;
+  --m-term-fg: #abb2bf;
+  --m-term-cursor: #528bff;
+  --m-term-selection: #3e4451;
+  --m-term-black: #21252b;
+  --m-term-red: #e06c75;
+  --m-term-green: #98c379;
+  --m-term-yellow: #e5c07b;
+  --m-term-blue: #61afef;
+  --m-term-magenta: #c678dd;
+  --m-term-cyan: #56b6c2;
+  --m-term-white: #abb2bf;
+
+  --m-scrollbar-thumb: #4b5263;
+  --m-scrollbar-track: transparent;
+
+  --m-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --m-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+  --m-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.6);
+}

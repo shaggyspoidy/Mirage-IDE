@@ -1,0 +1,60 @@
+/**
+ * Light Theme — a clean, high-contrast light palette.
+ * 
+ * WHY include a light theme: Some users prefer light mode for daytime
+ * coding or high-ambient-light environments. Accessibility matters.
+ */
+[data-theme="light"] {
+  --m-bg-primary: #eff1f5;
+  --m-bg-secondary: #e6e9ef;
+  --m-bg-tertiary: #dce0e8;
+  --m-bg-surface: #ccd0da;
+  --m-bg-overlay: #bcc0cc;
+
+  --m-fg-primary: #4c4f69;
+  --m-fg-secondary: #5c5f77;
+  --m-fg-muted: #8c8fa1;
+  --m-fg-subtle: #9ca0b0;
+
+  --m-border-primary: #ccd0da;
+  --m-border-secondary: #bcc0cc;
+  --m-border-accent: #1e66f5;
+
+  --m-accent-blue: #1e66f5;
+  --m-accent-green: #40a02b;
+  --m-accent-red: #d20f39;
+  --m-accent-yellow: #df8e1d;
+  --m-accent-purple: #8839ef;
+  --m-accent-pink: #ea76cb;
+  --m-accent-teal: #179299;
+  --m-accent-peach: #fe640b;
+
+  --m-hover-bg: #ccd0da;
+  --m-active-bg: #bcc0cc;
+  --m-focus-ring: #1e66f5;
+
+  --m-titlebar-bg: #e6e9ef;
+  --m-titlebar-fg: #4c4f69;
+  --m-titlebar-btn-hover: #ccd0da;
+  --m-titlebar-btn-close-hover: #d20f39;
+
+  --m-term-bg: #eff1f5;
+  --m-term-fg: #4c4f69;
+  --m-term-cursor: #dc8a78;
+  --m-term-selection: #acb0be66;
+  --m-term-black: #5c5f77;
+  --m-term-red: #d20f39;
+  --m-term-green: #40a02b;
+  --m-term-yellow: #df8e1d;
+  --m-term-blue: #1e66f5;
+  --m-term-magenta: #ea76cb;
+  --m-term-cyan: #179299;
+  --m-term-white: #acb0be;
+
+  --m-scrollbar-thumb: #bcc0cc;
+  --m-scrollbar-track: #eff1f5;
+
+  --m-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --m-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --m-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.15);
+}

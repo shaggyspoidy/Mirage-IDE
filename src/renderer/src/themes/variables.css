@@ -1,0 +1,81 @@
+/**
+ * CSS Variable Schema — the single source of truth for all colors in Mirage.
+ * 
+ * WHY CSS variables instead of Tailwind's config-based theming:
+ * CSS variables allow runtime theme switching without rebuilding CSS.
+ * Tailwind classes reference these variables via theme.extend, so we get
+ * both the utility-class DX and instant runtime theme changes.
+ * 
+ * HOW themes work: Each theme file (.css) sets these variables on [data-theme="x"].
+ * The useTheme hook applies the data-theme attribute to <html>.
+ * 
+ * NAMING CONVENTION:
+ * --m-{category}-{variant}
+ * m = mirage (namespace to avoid collisions)
+ * category = bg, fg, border, accent, terminal, etc.
+ * variant = primary, secondary, muted, etc.
+ */
+
+:root {
+  /* Base backgrounds */
+  --m-bg-primary: #1e1e2e;
+  --m-bg-secondary: #181825;
+  --m-bg-tertiary: #11111b;
+  --m-bg-surface: #313244;
+  --m-bg-overlay: #45475a;
+
+  /* Foreground / text */
+  --m-fg-primary: #cdd6f4;
+  --m-fg-secondary: #bac2de;
+  --m-fg-muted: #6c7086;
+  --m-fg-subtle: #585b70;
+
+  /* Borders */
+  --m-border-primary: #313244;
+  --m-border-secondary: #45475a;
+  --m-border-accent: #89b4fa;
+
+  /* Accent colors */
+  --m-accent-blue: #89b4fa;
+  --m-accent-green: #a6e3a1;
+  --m-accent-red: #f38ba8;
+  --m-accent-yellow: #f9e2af;
+  --m-accent-purple: #cba6f7;
+  --m-accent-pink: #f5c2e7;
+  --m-accent-teal: #94e2d5;
+  --m-accent-peach: #fab387;
+
+  /* Interactive states */
+  --m-hover-bg: #313244;
+  --m-active-bg: #45475a;
+  --m-focus-ring: #89b4fa;
+
+  /* Title bar */
+  --m-titlebar-bg: #181825;
+  --m-titlebar-fg: #cdd6f4;
+  --m-titlebar-btn-hover: #313244;
+  --m-titlebar-btn-close-hover: #f38ba8;
+
+  /* Terminal (xterm.js theme sync) */
+  --m-term-bg: #1e1e2e;
+  --m-term-fg: #cdd6f4;
+  --m-term-cursor: #f5e0dc;
+  --m-term-selection: #585b7066;
+  --m-term-black: #45475a;
+  --m-term-red: #f38ba8;
+  --m-term-green: #a6e3a1;
+  --m-term-yellow: #f9e2af;
+  --m-term-blue: #89b4fa;
+  --m-term-magenta: #f5c2e7;
+  --m-term-cyan: #94e2d5;
+  --m-term-white: #bac2de;
+
+  /* Scrollbar */
+  --m-scrollbar-thumb: #45475a;
+  --m-scrollbar-track: #1e1e2e;
+
+  /* Shadows */
+  --m-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --m-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --m-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
+}

@@ -1,0 +1,58 @@
+/**
+ * GitHub Dark — The classic high-contrast GitHub dark theme.
+ */
+[data-theme="github-dark"] {
+  --m-bg-primary: #0d1117;
+  --m-bg-secondary: #010409;
+  --m-bg-tertiary: #161b22;
+  --m-bg-surface: #21262d;
+  --m-bg-overlay: #30363d;
+
+  --m-fg-primary: #c9d1d9;
+  --m-fg-secondary: #f0f6fc;
+  --m-fg-muted: #8b949e;
+  --m-fg-subtle: #484f58;
+
+  --m-border-primary: #30363d;
+  --m-border-secondary: #21262d;
+  --m-border-accent: #58a6ff;
+
+  /* GitHub Dark accents */
+  --m-accent-blue: #58a6ff;
+  --m-accent-green: #3fb950;
+  --m-accent-red: #f85149;
+  --m-accent-yellow: #d29922;
+  --m-accent-purple: #bc8cff;
+  --m-accent-pink: #f778ba;
+  --m-accent-teal: #39c5cf;
+  --m-accent-peach: #f0883e;
+
+  --m-hover-bg: #21262d;
+  --m-active-bg: #30363d;
+  --m-focus-ring: #58a6ff;
+
+  --m-titlebar-bg: #010409;
+  --m-titlebar-fg: #c9d1d9;
+  --m-titlebar-btn-hover: #21262d;
+  --m-titlebar-btn-close-hover: #f85149;
+
+  --m-term-bg: #0d1117;
+  --m-term-fg: #c9d1d9;
+  --m-term-cursor: #58a6ff;
+  --m-term-selection: #30363d;
+  --m-term-black: #484f58;
+  --m-term-red: #ff7b72;
+  --m-term-green: #3fb950;
+  --m-term-yellow: #d29922;
+  --m-term-blue: #58a6ff;
+  --m-term-magenta: #bc8cff;
+  --m-term-cyan: #39c5cf;
+  --m-term-white: #b1bac4;
+
+  --m-scrollbar-thumb: #30363d;
+  --m-scrollbar-track: transparent;
+
+  --m-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --m-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+  --m-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.6);
+}

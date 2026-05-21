@@ -1,0 +1,58 @@
+/**
+ * Dracula Theme — The popular dark theme with purple and pink accents.
+ */
+[data-theme="dracula"] {
+  --m-bg-primary: #282a36;
+  --m-bg-secondary: #21222c;
+  --m-bg-tertiary: #191a21;
+  --m-bg-surface: #44475a;
+  --m-bg-overlay: #6272a4;
+
+  --m-fg-primary: #f8f8f2;
+  --m-fg-secondary: #e2e2dc;
+  --m-fg-muted: #6272a4;
+  --m-fg-subtle: #44475a;
+
+  --m-border-primary: #44475a;
+  --m-border-secondary: #6272a4;
+  --m-border-accent: #bd93f9;
+
+  /* Dracula accents */
+  --m-accent-blue: #8be9fd;
+  --m-accent-green: #50fa7b;
+  --m-accent-red: #ff5555;
+  --m-accent-yellow: #f1fa8c;
+  --m-accent-purple: #bd93f9;
+  --m-accent-pink: #ff79c6;
+  --m-accent-teal: #8be9fd;
+  --m-accent-peach: #ffb86c;
+
+  --m-hover-bg: #44475a;
+  --m-active-bg: #6272a4;
+  --m-focus-ring: #bd93f9;
+
+  --m-titlebar-bg: #21222c;
+  --m-titlebar-fg: #f8f8f2;
+  --m-titlebar-btn-hover: #44475a;
+  --m-titlebar-btn-close-hover: #ff5555;
+
+  --m-term-bg: #282a36;
+  --m-term-fg: #f8f8f2;
+  --m-term-cursor: #bd93f9;
+  --m-term-selection: #44475a;
+  --m-term-black: #21222c;
+  --m-term-red: #ff5555;
+  --m-term-green: #50fa7b;
+  --m-term-yellow: #f1fa8c;
+  --m-term-blue: #bd93f9;
+  --m-term-magenta: #ff79c6;
+  --m-term-cyan: #8be9fd;
+  --m-term-white: #f8f8f2;
+
+  --m-scrollbar-thumb: #44475a;
+  --m-scrollbar-track: transparent;
+
+  --m-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --m-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+  --m-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.6);
+}

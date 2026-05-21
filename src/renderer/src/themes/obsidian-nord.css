@@ -1,0 +1,59 @@
+/**
+ * Obsidian Nord Theme — Inspired by the popular Nord community theme.
+ * Arctic, icy cold color palette.
+ */
+[data-theme="obsidian-nord"] {
+  --m-bg-primary: #2e3440;
+  --m-bg-secondary: #3b4252;
+  --m-bg-tertiary: #242933;
+  --m-bg-surface: #434c5e;
+  --m-bg-overlay: #4c566a;
+
+  --m-fg-primary: #d8dee9;
+  --m-fg-secondary: #e5e9f0;
+  --m-fg-muted: #81a1c1;
+  --m-fg-subtle: #4c566a;
+
+  --m-border-primary: #3b4252;
+  --m-border-secondary: #434c5e;
+  --m-border-accent: #88c0d0;
+
+  /* Nord accents */
+  --m-accent-blue: #88c0d0;
+  --m-accent-green: #a3be8c;
+  --m-accent-red: #bf616a;
+  --m-accent-yellow: #ebcb8b;
+  --m-accent-purple: #b48ead;
+  --m-accent-pink: #b48ead;
+  --m-accent-teal: #8fbcbb;
+  --m-accent-peach: #d08770;
+
+  --m-hover-bg: #3b4252;
+  --m-active-bg: #434c5e;
+  --m-focus-ring: #88c0d0;
+
+  --m-titlebar-bg: #2e3440;
+  --m-titlebar-fg: #d8dee9;
+  --m-titlebar-btn-hover: #3b4252;
+  --m-titlebar-btn-close-hover: #bf616a;
+
+  --m-term-bg: #2e3440;
+  --m-term-fg: #d8dee9;
+  --m-term-cursor: #88c0d0;
+  --m-term-selection: #88c0d044;
+  --m-term-black: #434c5e;
+  --m-term-red: #bf616a;
+  --m-term-green: #a3be8c;
+  --m-term-yellow: #ebcb8b;
+  --m-term-blue: #81a1c1;
+  --m-term-magenta: #b48ead;
+  --m-term-cyan: #8fbcbb;
+  --m-term-white: #e5e9f0;
+
+  --m-scrollbar-thumb: #434c5e;
+  --m-scrollbar-track: transparent;
+
+  --m-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --m-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+  --m-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.6);
+}

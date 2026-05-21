@@ -1,0 +1,60 @@
+/**
+ * Cyberpunk Theme — neon-infused, high-energy palette.
+ * Updated to be mostly pitch black with neon yellow accents.
+ */
+[data-theme="cyberpunk"] {
+  --m-bg-primary: #000000;
+  --m-bg-secondary: #0a0a0a;
+  --m-bg-tertiary: #050505;
+  --m-bg-surface: #111111;
+  --m-bg-overlay: #1a1a1a;
+
+  --m-fg-primary: #e0e0e0;
+  --m-fg-secondary: #a0a0a0;
+  --m-fg-muted: #666666;
+  --m-fg-subtle: #404040;
+
+  --m-border-primary: #222222;
+  --m-border-secondary: #333333;
+  --m-border-accent: #fce205; /* Neon yellow */
+
+  /* Neon accents */
+  --m-accent-blue: #00ffff; /* Keep a bit of cyan for secondary */
+  --m-accent-green: #39ff14; /* Neon green */
+  --m-accent-red: #ff003c; /* Cyberpunk red */
+  --m-accent-yellow: #fce205; /* Primary neon yellow */
+  --m-accent-purple: #9d00ff;
+  --m-accent-pink: #ff007f;
+  --m-accent-teal: #00ffcc;
+  --m-accent-peach: #ff5e00;
+
+  --m-hover-bg: #111111;
+  --m-active-bg: #1a1a1a;
+  --m-focus-ring: #fce205;
+
+  --m-titlebar-bg: #000000;
+  --m-titlebar-fg: #fce205;
+  --m-titlebar-btn-hover: #111111;
+  --m-titlebar-btn-close-hover: #ff003c;
+
+  --m-term-bg: #000000;
+  --m-term-fg: #e0e0e0;
+  --m-term-cursor: #fce205;
+  --m-term-selection: #fce20544;
+  --m-term-black: #1a1a1a;
+  --m-term-red: #ff003c;
+  --m-term-green: #39ff14;
+  --m-term-yellow: #fce205;
+  --m-term-blue: #00ffff;
+  --m-term-magenta: #ff007f;
+  --m-term-cyan: #00ffcc;
+  --m-term-white: #ffffff;
+
+  --m-scrollbar-thumb: #222222;
+  --m-scrollbar-track: #000000;
+
+  --m-shadow-sm: 0 1px 2px rgba(252, 226, 5, 0.1);
+  --m-shadow-md: 0 4px 12px rgba(252, 226, 5, 0.15);
+  --m-shadow-lg: 0 12px 40px rgba(252, 226, 5, 0.2);
+}
+

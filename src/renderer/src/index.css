@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'JetBrainsMono Nerd Font';
+  src: url('./assets/fonts/JetBrainsMonoNerdFont-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 
+ * Map our CSS variables to Tailwind's theme system using Tailwind v4 syntax.
+ * This allows using utility classes like bg-primary, text-accent-blue, etc.
+ * while keeping the raw CSS variables as the source of truth for runtime switching.
+ */
+@theme {
+  --color-bg-primary: var(--m-bg-primary);
+  --color-bg-secondary: var(--m-bg-secondary);
+  --color-bg-tertiary: var(--m-bg-tertiary);
+  --color-bg-surface: var(--m-bg-surface);
+  --color-bg-overlay: var(--m-bg-overlay);
+
+  --color-fg-primary: var(--m-fg-primary);
+  --color-fg-secondary: var(--m-fg-secondary);
+  --color-fg-muted: var(--m-fg-muted);
+  --color-fg-subtle: var(--m-fg-subtle);
+
+  --color-border-primary: var(--m-border-primary);
+  --color-border-secondary: var(--m-border-secondary);
+  --color-border-accent: var(--m-border-accent);
+
+  --color-accent-blue: var(--m-accent-blue);
+  --color-accent-green: var(--m-accent-green);
+  --color-accent-red: var(--m-accent-red);
+  --color-accent-yellow: var(--m-accent-yellow);
+  --color-accent-purple: var(--m-accent-purple);
+  --color-accent-pink: var(--m-accent-pink);
+  --color-accent-teal: var(--m-accent-teal);
+  --color-accent-peach: var(--m-accent-peach);
+}
+
+/* Import our theme variables */
+@import "./themes/variables.css";
+@import "./themes/catppuccin-mocha.css";
+@import "./themes/dark.css";
+@import "./themes/light.css";
+@import "./themes/cyberpunk.css";
+@import "./themes/obsidian-default.css";
+@import "./themes/obsidian-nord.css";
+@import "./themes/dracula.css";
+@import "./themes/one-dark-pro.css";
+@import "./themes/github-dark.css";
+
+/* Reset & Global Styles */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--m-bg-primary);
+  color: var(--m-fg-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+/* Electron Window Dragging Utilities */
+.drag {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* Markdown Styles for AI Chat */
+.markdown-body p { margin-bottom: 0.75em; }
+.markdown-body pre { background: var(--m-bg-primary); padding: 0.75rem; border-radius: 4px; overflow-x: auto; margin-bottom: 0.75em; border: 1px solid var(--m-border-primary); }
+.markdown-body code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 0.9em; }
+.markdown-body pre code { background: none; padding: 0; border: none; }
+.markdown-body :not(pre) > code { background: var(--m-bg-primary); padding: 0.1em 0.3em; border-radius: 3px; border: 1px solid var(--m-border-primary); }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--m-scrollbar-thumb, var(--m-bg-overlay));
+  border-radius: 6px;
+  border: 3px solid var(--m-bg-primary);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--m-border-accent);
+  border: 3px solid var(--m-bg-primary);
+  border-radius: 6px;
+  background-clip: padding-box;
+}
+
+/* Hide scrollbar completely when no-scrollbar is applied */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

@@ -1,0 +1,59 @@
+/**
+ * Obsidian Default Theme — Inspired by Obsidian's standard dark mode.
+ * Features a sleek dark gray palette with signature purple accents.
+ */
+[data-theme="obsidian-default"] {
+  --m-bg-primary: #1e1e1e;
+  --m-bg-secondary: #272727;
+  --m-bg-tertiary: #161616;
+  --m-bg-surface: #2d2d2d;
+  --m-bg-overlay: #363636;
+
+  --m-fg-primary: #dcddde;
+  --m-fg-secondary: #9e9e9e;
+  --m-fg-muted: #737373;
+  --m-fg-subtle: #525252;
+
+  --m-border-primary: #363636;
+  --m-border-secondary: #404040;
+  --m-border-accent: #8b6ce3;
+
+  /* Obsidian signature purple accent */
+  --m-accent-blue: #8b6ce3; /* Overriding blue with purple for primary actions */
+  --m-accent-green: #2ecc71;
+  --m-accent-red: #e74c3c;
+  --m-accent-yellow: #f1c40f;
+  --m-accent-purple: #8b6ce3;
+  --m-accent-pink: #d946ef;
+  --m-accent-teal: #1abc9c;
+  --m-accent-peach: #e67e22;
+
+  --m-hover-bg: #2d2d2d;
+  --m-active-bg: #363636;
+  --m-focus-ring: #8b6ce3;
+
+  --m-titlebar-bg: #1e1e1e;
+  --m-titlebar-fg: #dcddde;
+  --m-titlebar-btn-hover: #2d2d2d;
+  --m-titlebar-btn-close-hover: #e74c3c;
+
+  --m-term-bg: #1e1e1e;
+  --m-term-fg: #dcddde;
+  --m-term-cursor: #8b6ce3;
+  --m-term-selection: #8b6ce344;
+  --m-term-black: #363636;
+  --m-term-red: #e74c3c;
+  --m-term-green: #2ecc71;
+  --m-term-yellow: #f1c40f;
+  --m-term-blue: #8b6ce3;
+  --m-term-magenta: #d946ef;
+  --m-term-cyan: #1abc9c;
+  --m-term-white: #dcddde;
+
+  --m-scrollbar-thumb: #363636;
+  --m-scrollbar-track: transparent;
+
+  --m-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --m-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+  --m-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.6);
+}
