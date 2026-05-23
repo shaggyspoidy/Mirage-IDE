@@ -111,14 +111,49 @@ function App(): React.JSX.Element {
   // Global keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
+      const ctrl = e.ctrlKey || e.metaKey
+
       // Ctrl+Shift+F — Global Search
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'F') {
+      if (ctrl && e.shiftKey && e.key === 'F') {
         e.preventDefault()
         setIsSearchOpen(true)
       }
+
+      // Ctrl+N — New untitled file
+      if (ctrl && !e.shiftKey && e.key === 'n') {
+        e.preventDefault()
+        useWorkspaceStore.getState().createUntitledFile()
+      }
+
+      // Ctrl+S — Save active file
+      if (ctrl && !e.shiftKey && e.key === 's') {
+        e.preventDefault()
+        const path = useWorkspaceStore.getState().activeFilePath
+        if (path) useWorkspaceStore.getState().saveFile(path)
+      }
+
+      // Ctrl+Shift+S — Save all files
+      if (ctrl && e.shiftKey && e.key === 'S') {
+        e.preventDefault()
+        useWorkspaceStore.getState().saveAllFiles()
+      }
+
+      // Ctrl+` — Toggle terminal
+      if (ctrl && e.key === '`') {
+        e.preventDefault()
+        useWorkspaceStore.getState().toggleTerminal()
+      }
     }
+
+    // Listen for custom search event from MenuBar
+    const handleOpenSearch = () => setIsSearchOpen(true)
+    window.addEventListener('mirage:openSearch', handleOpenSearch)
+
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('mirage:openSearch', handleOpenSearch)
+    }
   }, [])
 
   return (

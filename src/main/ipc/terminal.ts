@@ -2,8 +2,8 @@ import { ipcMain, BrowserWindow } from 'electron'
 import { ptyManager } from '../services/pty-manager'
 
 export function registerTerminalHandlers(): void {
-  ipcMain.on('terminal:spawn', (event, cols: number, rows: number) => {
-    ptyManager.spawn(cols, rows)
+  ipcMain.on('terminal:spawn', (event, cols: number, rows: number, cwd?: string) => {
+    ptyManager.spawn(cols, rows, cwd)
 
     ptyManager.onData((data) => {
       const win = BrowserWindow.fromWebContents(event.sender)

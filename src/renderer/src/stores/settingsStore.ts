@@ -12,17 +12,26 @@ interface SettingsState {
   
   theme: string
   setTheme: (theme: string) => void
+  
+  autoSave: boolean
+  setAutoSave: (enabled: boolean) => void
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
   isSettingsOpen: false,
   keyStatus: {},
   theme: localStorage.getItem('mirage-theme') || 'dark',
+  autoSave: localStorage.getItem('mirage-autosave') !== 'false', // Default to true
 
   setTheme: (theme: string) => {
     localStorage.setItem('mirage-theme', theme)
     document.documentElement.setAttribute('data-theme', theme)
     set({ theme })
+  },
+
+  setAutoSave: (enabled: boolean) => {
+    localStorage.setItem('mirage-autosave', enabled.toString())
+    set({ autoSave: enabled })
   },
 
   toggleSettings: () => set((state) => ({ isSettingsOpen: !state.isSettingsOpen })),

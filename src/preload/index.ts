@@ -147,7 +147,7 @@ const settingsApi = {
 }
 
 const terminalApi = {
-  spawn: (cols: number, rows: number) => ipcRenderer.send('terminal:spawn', cols, rows),
+  spawn: (cols: number, rows: number, cwd?: string) => ipcRenderer.send('terminal:spawn', cols, rows, cwd),
   write: (data: string) => ipcRenderer.send('terminal:write', data),
   resize: (cols: number, rows: number) => ipcRenderer.send('terminal:resize', cols, rows),
   kill: () => ipcRenderer.send('terminal:kill'),

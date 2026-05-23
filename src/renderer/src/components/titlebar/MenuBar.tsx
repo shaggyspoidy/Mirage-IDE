@@ -15,6 +15,18 @@ interface MenuDefinition {
   items: MenuItemType[]
 }
 
+/**
+ * Helper to trigger a Monaco editor action by its ID.
+ * Falls back silently if no editor is mounted.
+ */
+function triggerEditorAction(actionId: string): void {
+  const editor = useWorkspaceStore.getState().editorInstance
+  if (editor) {
+    editor.focus()
+    editor.trigger('menu', actionId, null)
+  }
+}
+
 export function MenuBar(): React.JSX.Element {
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null)
   const menuBarRef = useRef<HTMLDivElement>(null)
@@ -26,9 +38,11 @@ export function MenuBar(): React.JSX.Element {
       id: 'file',
       label: 'File',
       items: [
-        { label: 'New Text File', shortcut: 'Ctrl+N', action: () => alert('Not implemented: New Text File') },
-        { label: 'New File...', shortcut: 'Ctrl+Alt+Windows+N', action: () => alert('Not implemented: New File') },
-        { label: 'New Window', shortcut: 'Ctrl+Shift+N', action: () => alert('Not implemented: New Window') },
+        { 
+          label: 'New Text File', 
+          shortcut: 'Ctrl+N', 
+          action: () => useWorkspaceStore.getState().createUntitledFile() 
+        },
         { divider: true, label: '' },
         { 
           label: 'Open File...', 
@@ -52,9 +66,19 @@ export function MenuBar(): React.JSX.Element {
           }
         },
         { divider: true, label: '' },
-        { label: 'Save', shortcut: 'Ctrl+S', action: () => alert('Not implemented: Save') },
-        { label: 'Save As...', shortcut: 'Ctrl+Shift+S', action: () => alert('Not implemented: Save As') },
-        { label: 'Save All', shortcut: 'Ctrl+K S', action: () => alert('Not implemented: Save All') },
+        { 
+          label: 'Save', 
+          shortcut: 'Ctrl+S', 
+          action: () => {
+            const path = useWorkspaceStore.getState().activeFilePath
+            if (path) useWorkspaceStore.getState().saveFile(path)
+          }
+        },
+        { 
+          label: 'Save All', 
+          shortcut: 'Ctrl+K S', 
+          action: () => useWorkspaceStore.getState().saveAllFiles() 
+        },
         { divider: true, label: '' },
         { label: 'Exit', action: () => window.api.window.close() }
       ]
@@ -63,40 +87,58 @@ export function MenuBar(): React.JSX.Element {
       id: 'edit',
       label: 'Edit',
       items: [
-        { label: 'Undo', shortcut: 'Ctrl+Z', action: () => alert('Not implemented: Undo') },
-        { label: 'Redo', shortcut: 'Ctrl+Y', action: () => alert('Not implemented: Redo') },
+        { label: 'Undo', shortcut: 'Ctrl+Z', action: () => triggerEditorAction('undo') },
+        { label: 'Redo', shortcut: 'Ctrl+Y', action: () => triggerEditorAction('redo') },
         { divider: true, label: '' },
-        { label: 'Cut', shortcut: 'Ctrl+X', action: () => alert('Not implemented: Cut') },
-        { label: 'Copy', shortcut: 'Ctrl+C', action: () => alert('Not implemented: Copy') },
-        { label: 'Paste', shortcut: 'Ctrl+V', action: () => alert('Not implemented: Paste') },
+        { label: 'Cut', shortcut: 'Ctrl+X', action: () => triggerEditorAction('editor.action.clipboardCutAction') },
+        { label: 'Copy', shortcut: 'Ctrl+C', action: () => triggerEditorAction('editor.action.clipboardCopyAction') },
+        { label: 'Paste', shortcut: 'Ctrl+V', action: async () => {
+          const editor = useWorkspaceStore.getState().editorInstance
+          if (editor) {
+            try {
+              const text = await navigator.clipboard.readText()
+              editor.focus()
+              editor.trigger('menu', 'type', { text })
+            } catch {
+              editor.focus()
+            }
+          }
+        }},
         { divider: true, label: '' },
-        { label: 'Find', shortcut: 'Ctrl+F', action: () => alert('Not implemented: Find') },
-        { label: 'Replace', shortcut: 'Ctrl+H', action: () => alert('Not implemented: Replace') },
+        { label: 'Find', shortcut: 'Ctrl+F', action: () => triggerEditorAction('actions.find') },
+        { label: 'Replace', shortcut: 'Ctrl+H', action: () => triggerEditorAction('editor.action.startFindReplaceAction') },
         { divider: true, label: '' },
-        { label: 'Toggle Line Comment', shortcut: 'Ctrl+/', action: () => alert('Not implemented: Toggle Comment') }
+        { label: 'Toggle Line Comment', shortcut: 'Ctrl+/', action: () => triggerEditorAction('editor.action.commentLine') }
       ]
     },
     {
       id: 'selection',
       label: 'Selection',
       items: [
-        { label: 'Select All', shortcut: 'Ctrl+A', action: () => alert('Not implemented: Select All') },
-        { label: 'Expand Selection', shortcut: 'Shift+Alt+RightArrow', action: () => alert('Not implemented: Expand Selection') },
+        { label: 'Select All', shortcut: 'Ctrl+A', action: () => triggerEditorAction('editor.action.selectAll') },
+        { label: 'Expand Selection', shortcut: 'Shift+Alt+→', action: () => triggerEditorAction('editor.action.smartSelect.expand') },
+        { label: 'Shrink Selection', shortcut: 'Shift+Alt+←', action: () => triggerEditorAction('editor.action.smartSelect.shrink') },
         { divider: true, label: '' },
-        { label: 'Copy Line Up', shortcut: 'Shift+Alt+UpArrow', action: () => alert('Not implemented: Copy Line Up') },
-        { label: 'Copy Line Down', shortcut: 'Shift+Alt+DownArrow', action: () => alert('Not implemented: Copy Line Down') },
+        { label: 'Copy Line Up', shortcut: 'Shift+Alt+↑', action: () => triggerEditorAction('editor.action.copyLinesUpAction') },
+        { label: 'Copy Line Down', shortcut: 'Shift+Alt+↓', action: () => triggerEditorAction('editor.action.copyLinesDownAction') },
+        { label: 'Move Line Up', shortcut: 'Alt+↑', action: () => triggerEditorAction('editor.action.moveLinesUpAction') },
+        { label: 'Move Line Down', shortcut: 'Alt+↓', action: () => triggerEditorAction('editor.action.moveLinesDownAction') },
         { divider: true, label: '' },
-        { label: 'Add Cursor Above', shortcut: 'Ctrl+Alt+UpArrow', action: () => alert('Not implemented: Add Cursor Above') }
+        { label: 'Add Cursor Above', shortcut: 'Ctrl+Alt+↑', action: () => triggerEditorAction('editor.action.insertCursorAbove') },
+        { label: 'Add Cursor Below', shortcut: 'Ctrl+Alt+↓', action: () => triggerEditorAction('editor.action.insertCursorBelow') }
       ]
     },
     {
       id: 'view',
       label: 'View',
       items: [
-        { label: 'Command Palette...', shortcut: 'Ctrl+Shift+P', action: () => alert('Not implemented: Command Palette') },
+        { label: 'Command Palette...', shortcut: 'Ctrl+Shift+P', action: () => triggerEditorAction('editor.action.quickCommand') },
         { divider: true, label: '' },
-        { label: 'Explorer', shortcut: 'Ctrl+Shift+E', action: () => alert('Not implemented: Explorer') },
-        { label: 'Search', shortcut: 'Ctrl+Shift+F', action: () => alert('Not implemented: Search') },
+        { label: 'Search', shortcut: 'Ctrl+Shift+F', action: () => {
+          window.dispatchEvent(new CustomEvent('mirage:openSearch'))
+        }},
+        { divider: true, label: '' },
+        { label: 'Word Wrap', action: () => triggerEditorAction('editor.action.toggleWordWrap') },
         { divider: true, label: '' },
         { label: 'Terminal', shortcut: 'Ctrl+`', action: () => toggleTerminal() }
       ]
@@ -105,40 +147,64 @@ export function MenuBar(): React.JSX.Element {
       id: 'go',
       label: 'Go',
       items: [
-        { label: 'Back', shortcut: 'Alt+LeftArrow', action: () => alert('Not implemented: Back') },
-        { label: 'Forward', shortcut: 'Alt+RightArrow', action: () => alert('Not implemented: Forward') },
+        { label: 'Go to Line...', shortcut: 'Ctrl+G', action: () => triggerEditorAction('editor.action.gotoLine') },
         { divider: true, label: '' },
-        { label: 'Go to File...', shortcut: 'Ctrl+P', action: () => alert('Not implemented: Go to File') },
-        { label: 'Go to Definition', shortcut: 'F12', action: () => alert('Not implemented: Go to Definition') }
-      ]
-    },
-    {
-      id: 'run',
-      label: 'Run',
-      items: [
-        { label: 'Start Debugging', shortcut: 'F5', action: () => alert('Not implemented: Start Debugging') },
-        { label: 'Run Without Debugging', shortcut: 'Ctrl+F5', action: () => alert('Not implemented: Run Without Debugging') },
-        { divider: true, label: '' },
-        { label: 'Toggle Breakpoint', shortcut: 'F9', action: () => alert('Not implemented: Toggle Breakpoint') }
+        { label: 'Go to Bracket', shortcut: 'Ctrl+Shift+\\', action: () => triggerEditorAction('editor.action.jumpToBracket') }
       ]
     },
     {
       id: 'terminal',
       label: 'Terminal',
       items: [
-        { label: 'New Terminal', shortcut: 'Ctrl+Shift+`', action: () => toggleTerminal() },
+        { label: 'New Terminal', shortcut: 'Ctrl+Shift+`', action: () => {
+          const { isTerminalOpen } = useWorkspaceStore.getState()
+          if (!isTerminalOpen) toggleTerminal()
+        }},
         { divider: true, label: '' },
-        { label: 'Run Task...', action: () => alert('Not implemented: Run Task') }
+        { label: 'Run Active File', action: () => {
+          const path = useWorkspaceStore.getState().activeFilePath
+          if (path && !path.startsWith('untitled')) {
+            const ext = path.split('.').pop()?.toLowerCase()
+            let cmd = ''
+            if (ext === 'py') cmd = `python "${path}"`
+            else if (ext === 'js') cmd = `node "${path}"`
+            else if (ext === 'ts') cmd = `npx tsx "${path}"`
+            else if (ext === 'java') {
+              const dir = path.replace(/\\/g, '/').split('/').slice(0, -1).join('/')
+              const filename = path.replace(/\\/g, '/').split('/').pop()?.replace('.java', '') || ''
+              cmd = `cd "${dir}" && javac "${filename}.java" && java "${filename}"`
+            }
+            else if (ext === 'c') {
+              const out = path.replace(/\\/g, '/').replace('.c', '')
+              cmd = `gcc "${path}" -o "${out}" && "${out}"`
+            }
+            else if (ext === 'cpp' || ext === 'cc' || ext === 'cxx') {
+              const out = path.replace(/\\/g, '/').replace(/\.(cpp|cc|cxx)$/, '')
+              cmd = `g++ "${path}" -o "${out}" && "${out}"`
+            }
+            else if (ext === 'go') cmd = `go run "${path}"`
+            else if (ext === 'rs') cmd = `rustc "${path}" -o "${path.replace('.rs', '')}" && "${path.replace('.rs', '')}"`
+            else if (ext === 'rb') cmd = `ruby "${path}"`
+            else if (ext === 'php') cmd = `php "${path}"`
+            else if (ext === 'sh' || ext === 'bash') cmd = `bash "${path}"`
+            else cmd = `echo "No runner configured for .${ext} files"`
+            useWorkspaceStore.getState().executeCommand(cmd)
+          }
+        }}
       ]
     },
     {
       id: 'help',
       label: 'Help',
       items: [
-        { label: 'Welcome', action: () => alert('Not implemented: Welcome') },
-        { label: 'Keyboard Shortcuts Reference', shortcut: 'Ctrl+K Ctrl+R', action: () => alert('Not implemented: Keyboard Shortcuts') },
+        { label: 'Keyboard Shortcuts', shortcut: 'Ctrl+K Ctrl+S', action: () => triggerEditorAction('editor.action.quickCommand') },
         { divider: true, label: '' },
-        { label: 'About', action: () => alert('Mirage IDE v1.0.0') }
+        { label: 'About Mirage', action: () => {
+          // A simple, non-blocking about — could be made fancier later
+          const editor = useWorkspaceStore.getState().editorInstance
+          if (editor) editor.focus()
+          alert('Mirage IDE v1.0.0\n\nA next-generation, agent-first IDE built with Electron, React, and Monaco Editor.\n\nhttps://github.com/shaggyspoidy/Mirage-IDE')
+        }}
       ]
     }
   ]

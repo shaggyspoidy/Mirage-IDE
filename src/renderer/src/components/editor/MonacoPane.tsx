@@ -1,6 +1,8 @@
+import { useEffect, useRef } from 'react'
 import Editor, { OnMount, DiffEditor } from '@monaco-editor/react'
-import { Check, X } from 'lucide-react'
+import { Check, X, ChevronRight } from 'lucide-react'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
+import { useSettingsStore } from '../../stores/settingsStore'
 
 /**
  * MonacoPane — The primary text editor component powering the IDE.
@@ -13,10 +15,37 @@ export function MonacoPane(): React.JSX.Element {
     updateFileContent,
     pendingDiffs,
     acceptDiff,
-    rejectDiff
+    rejectDiff,
+    currentFolder,
+    saveFile
   } = useWorkspaceStore()
+  const { autoSave } = useSettingsStore()
   
   const activeFile = openFiles.find(f => f.path === activeFilePath)
+
+  // Auto-Save logic
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => {
+    if (autoSave && activeFile && activeFile.isDirty) {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
+      saveTimeoutRef.current = setTimeout(() => {
+        saveFile(activeFile.path)
+      }, 1500) // 1.5s delay
+    }
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
+    }
+  }, [activeFile?.content, activeFile?.isDirty, autoSave, activeFile?.path, saveFile])
+
+  // Derive breadcrumbs from path
+  const getBreadcrumbs = (path: string) => {
+    if (!currentFolder || !path.startsWith(currentFolder)) {
+      return path.split(/[/\\]/).filter(Boolean)
+    }
+    const relative = path.slice(currentFolder.length).replace(/^[/\\]/, '')
+    const folderName = currentFolder.split(/[/\\]/).pop() || 'Workspace'
+    return [folderName, ...relative.split(/[/\\]/).filter(Boolean)]
+  }
 
   // Determine language based on file extension
   const getLanguage = (filename: string): string => {
@@ -59,6 +88,9 @@ export function MonacoPane(): React.JSX.Element {
   }
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
+    // Store editor instance for menu bar actions
+    useWorkspaceStore.getState().setEditorInstance(editor)
+
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
       const currentPath = useWorkspaceStore.getState().activeFilePath
       if (currentPath) {
@@ -130,6 +162,20 @@ export function MonacoPane(): React.JSX.Element {
         ))}
       </div>
 
+      {/* Breadcrumbs */}
+      {activeFile && (
+        <div className="flex items-center px-4 py-1 bg-[var(--m-bg-primary)] border-b border-[var(--m-border-primary)] overflow-x-auto no-scrollbar shrink-0">
+          {getBreadcrumbs(activeFile.path).map((segment, idx, arr) => (
+            <div key={idx} className="flex items-center text-[11px] text-[var(--m-fg-secondary)] hover:text-[var(--m-fg-primary)] cursor-pointer transition-colors whitespace-nowrap">
+              <span>{segment}</span>
+              {idx < arr.length - 1 && (
+                <ChevronRight size={12} className="mx-1 opacity-50" />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Monaco Editor / Diff Editor */}
       <div className="flex-1 min-h-0 relative">
         {activeFile && pendingDiffs[activeFile.path] !== undefined ? (
@@ -177,7 +223,7 @@ export function MonacoPane(): React.JSX.Element {
             onChange={(value) => updateFileContent(activeFile.path, value || '')}
             onMount={handleEditorDidMount}
             options={{
-              minimap: { enabled: false },
+              minimap: { enabled: true, scale: 1, showSlider: 'mouseover' },
               fontSize: 13,
               fontFamily: 'JetBrainsMono Nerd Font, monospace',
               wordWrap: 'on',

@@ -23,6 +23,12 @@ interface WorkspaceState {
   /** Map of filepath -> proposed AI new content */
   pendingDiffs: Record<string, string>
   
+  /** Reference to the active Monaco editor instance for triggering commands */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  editorInstance: any | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setEditorInstance: (editor: any | null) => void
+  
   /** Callback set by MonacoPane to insert text at cursor */
   editorInsertCallback: ((text: string) => void) | null
   setEditorInsertCallback: (cb: ((text: string) => void) | null) => void
@@ -48,6 +54,9 @@ interface WorkspaceState {
   
   /** Save a file back to disk */
   saveFile: (path: string) => Promise<void>
+
+  /** Save all dirty files to disk */
+  saveAllFiles: () => Promise<void>
   
   /** Toggle integrated terminal visibility */
   toggleTerminal: () => void
@@ -57,6 +66,9 @@ interface WorkspaceState {
 
   /** Create a new file and open it in the editor */
   createNewFile: (filename: string, content: string) => Promise<void>
+
+  /** Create an untitled scratch file in the editor */
+  createUntitledFile: () => void
 
   /** Update cursor position (from Monaco) */
   setCursorPosition: (line: number, column: number) => void
@@ -77,9 +89,11 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   isTerminalOpen: false,
   cursorPosition: null,
   pendingDiffs: {},
+  editorInstance: null,
   editorInsertCallback: null,
   terminalExecuteCallback: null,
 
+  setEditorInstance: (editor) => set({ editorInstance: editor }),
   setEditorInsertCallback: (cb) => set({ editorInsertCallback: cb }),
   setTerminalExecuteCallback: (cb) => set({ terminalExecuteCallback: cb }),
 
@@ -149,6 +163,21 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     }
   },
 
+  saveAllFiles: async () => {
+    const { openFiles } = get()
+    const dirtyFiles = openFiles.filter(f => f.isDirty)
+    for (const file of dirtyFiles) {
+      try {
+        await window.api.fs.writeFile(file.path, file.content)
+      } catch (error) {
+        console.error('Failed to save file:', file.path, error)
+      }
+    }
+    set({
+      openFiles: openFiles.map(f => f.isDirty ? { ...f, isDirty: false } : f)
+    })
+  },
+
   toggleTerminal: () => set(state => ({ isTerminalOpen: !state.isTerminalOpen })),
 
   insertAtCursor: (content: string) => {
@@ -173,6 +202,21 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     } catch (error) {
       console.error('Failed to create new file:', error)
     }
+  },
+
+  createUntitledFile: () => {
+    const { openFiles } = get()
+    // Find next untitled number
+    let num = 1
+    while (openFiles.some(f => f.path === `untitled-${num}`)) {
+      num++
+    }
+    const path = `untitled-${num}`
+    const name = `Untitled-${num}`
+    set({
+      openFiles: [...openFiles, { path, name, content: '', isDirty: false }],
+      activeFilePath: path
+    })
   },
 
   setCursorPosition: (line: number, column: number) => set({ cursorPosition: { line, column } }),

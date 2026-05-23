@@ -8,9 +8,10 @@ export function TerminalPane(): React.JSX.Element {
   const terminalRef = useRef<HTMLDivElement>(null)
   const xtermRef = useRef<Terminal | null>(null)
   const fitAddonRef = useRef<FitAddon | null>(null)
+  const currentFolder = useWorkspaceStore((state) => state.currentFolder)
 
   useEffect(() => {
-    if (!terminalRef.current) return
+    if (!terminalRef.current || !currentFolder) return
 
     // Initialize xterm
     const term = new Terminal({
@@ -30,9 +31,9 @@ export function TerminalPane(): React.JSX.Element {
     // Slight delay to ensure DOM is ready for fit
     setTimeout(() => {
       fitAddon.fit()
-      // Ask main process to spawn a shell
+      // Ask main process to spawn a shell in the workspace folder
       if (window.api && window.api.terminal) {
-        window.api.terminal.spawn(term.cols, term.rows)
+        window.api.terminal.spawn(term.cols, term.rows, currentFolder)
       }
     }, 50)
 
@@ -83,7 +84,20 @@ export function TerminalPane(): React.JSX.Element {
       }
       term.dispose()
     }
-  }, [])
+  }, [currentFolder])
+
+  if (!currentFolder) {
+    return (
+      <div className="w-full h-full flex flex-col bg-[#1e1e1e] border-t border-[var(--m-border-primary)]">
+        <div className="flex items-center px-3 py-1.5 bg-[var(--m-bg-secondary)] border-b border-[var(--m-border-primary)]">
+          <span className="text-xs font-medium text-[var(--m-fg-primary)] uppercase tracking-wider">Terminal</span>
+        </div>
+        <div className="flex-1 flex items-center justify-center text-[var(--m-fg-muted)] text-sm">
+          Open a folder to use the terminal
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full h-full flex flex-col bg-[#1e1e1e] border-t border-[var(--m-border-primary)]">
@@ -94,3 +108,4 @@ export function TerminalPane(): React.JSX.Element {
     </div>
   )
 }
+

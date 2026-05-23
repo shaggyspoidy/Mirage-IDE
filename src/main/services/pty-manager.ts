@@ -5,7 +5,7 @@ class PtyManager {
   private ptyProcess: pty.IPty | null = null
   private onDataCallback: ((data: string) => void) | null = null
 
-  spawn(cols: number = 80, rows: number = 24) {
+  spawn(cols: number = 80, rows: number = 24, cwd?: string) {
     if (this.ptyProcess) {
       this.kill()
     }
@@ -16,7 +16,7 @@ class PtyManager {
       name: 'xterm-color',
       cols: cols,
       rows: rows,
-      cwd: process.env.HOME || process.env.USERPROFILE,
+      cwd: cwd || process.env.HOME || process.env.USERPROFILE,
       env: process.env as Record<string, string>
     })
 
