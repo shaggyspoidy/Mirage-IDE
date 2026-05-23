@@ -8,6 +8,7 @@ import { MoreModelsPanel } from './components/ai/MoreModelsPanel'
 import { TerminalPane } from './components/terminal/TerminalPane'
 import { StatusBar } from './components/statusbar/StatusBar'
 import { SearchPanel } from './components/search/SearchPanel'
+import { CommandPalette } from './components/command/CommandPalette'
 import { useWorkspaceStore } from './stores/workspaceStore'
 import { useSettingsStore } from './stores/settingsStore'
 
@@ -113,35 +114,43 @@ function App(): React.JSX.Element {
     const handleKeyDown = (e: KeyboardEvent): void => {
       const ctrl = e.ctrlKey || e.metaKey
 
+      const key = e.key.toLowerCase()
+
       // Ctrl+Shift+F — Global Search
-      if (ctrl && e.shiftKey && e.key === 'F') {
+      if (ctrl && e.shiftKey && key === 'f') {
         e.preventDefault()
         setIsSearchOpen(true)
       }
 
       // Ctrl+N — New untitled file
-      if (ctrl && !e.shiftKey && e.key === 'n') {
+      if (ctrl && !e.shiftKey && key === 'n') {
         e.preventDefault()
         useWorkspaceStore.getState().createUntitledFile()
       }
 
       // Ctrl+S — Save active file
-      if (ctrl && !e.shiftKey && e.key === 's') {
+      if (ctrl && !e.shiftKey && key === 's') {
         e.preventDefault()
         const path = useWorkspaceStore.getState().activeFilePath
         if (path) useWorkspaceStore.getState().saveFile(path)
       }
 
       // Ctrl+Shift+S — Save all files
-      if (ctrl && e.shiftKey && e.key === 'S') {
+      if (ctrl && e.shiftKey && key === 's') {
         e.preventDefault()
         useWorkspaceStore.getState().saveAllFiles()
       }
 
       // Ctrl+` — Toggle terminal
-      if (ctrl && e.key === '`') {
+      if (ctrl && key === '`') {
         e.preventDefault()
         useWorkspaceStore.getState().toggleTerminal()
+      }
+
+      // Ctrl+Shift+P — Command Palette
+      if (ctrl && e.shiftKey && key === 'p') {
+        e.preventDefault()
+        useWorkspaceStore.getState().toggleCommandPalette()
       }
     }
 
@@ -204,6 +213,9 @@ function App(): React.JSX.Element {
 
       {/* Global Search Overlay */}
       <SearchPanel isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+
+      {/* Command Palette Overlay */}
+      <CommandPalette />
     </div>
   )
 }

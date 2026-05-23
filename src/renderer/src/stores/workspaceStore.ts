@@ -80,6 +80,10 @@ interface WorkspaceState {
 
   /** Execute a shell command in the integrated terminal */
   executeCommand: (cmd: string) => void
+
+  /** Toggle command palette visibility */
+  isCommandPaletteOpen: boolean
+  toggleCommandPalette: () => void
 }
 
 export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
@@ -92,10 +96,13 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   editorInstance: null,
   editorInsertCallback: null,
   terminalExecuteCallback: null,
+  isCommandPaletteOpen: false,
 
   setEditorInstance: (editor) => set({ editorInstance: editor }),
   setEditorInsertCallback: (cb) => set({ editorInsertCallback: cb }),
   setTerminalExecuteCallback: (cb) => set({ terminalExecuteCallback: cb }),
+
+  toggleCommandPalette: () => set((state) => ({ isCommandPaletteOpen: !state.isCommandPaletteOpen })),
 
   openFolder: (path: string) => {
     set({ currentFolder: path, openFiles: [], activeFilePath: null })

@@ -132,7 +132,7 @@ export function MenuBar(): React.JSX.Element {
       id: 'view',
       label: 'View',
       items: [
-        { label: 'Command Palette...', shortcut: 'Ctrl+Shift+P', action: () => triggerEditorAction('editor.action.quickCommand') },
+        { label: 'Command Palette...', shortcut: 'Ctrl+Shift+P', action: () => useWorkspaceStore.getState().toggleCommandPalette() },
         { divider: true, label: '' },
         { label: 'Search', shortcut: 'Ctrl+Shift+F', action: () => {
           window.dispatchEvent(new CustomEvent('mirage:openSearch'))
