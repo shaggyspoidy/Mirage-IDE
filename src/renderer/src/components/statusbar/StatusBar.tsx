@@ -7,13 +7,13 @@ import { BotMessageSquare, GitBranch } from 'lucide-react'
  * Gradient accent line on top for that premium feel.
  */
 export function StatusBar(): React.JSX.Element {
-  const { activeFilePath, cursorPosition, openFiles } = useWorkspaceStore()
+  const { activeFilePath, cursorPosition, openFiles, gitBranch, gitDirtyCount } = useWorkspaceStore()
   const { selectedModelId, models } = useModelStore()
 
   const activeFile = openFiles.find(f => f.path === activeFilePath)
   const selectedModel = models.find(m => m.id === selectedModelId)
 
-  // Derive language from file extension
+  // ... (keep language detection)
   const getLanguage = (): string => {
     if (!activeFilePath) return 'Plain Text'
     const ext = activeFilePath.split('.').pop()?.toLowerCase() || ''
@@ -38,6 +38,15 @@ export function StatusBar(): React.JSX.Element {
       <div className="flex items-center justify-between h-[22px] px-3 bg-[var(--m-bg-tertiary)] text-[10px] text-[var(--m-fg-muted)] select-none">
         {/* Left section */}
         <div className="flex items-center gap-3">
+          {/* Git Branch */}
+          {gitBranch && (
+            <div className="flex items-center gap-1 hover:text-[var(--m-fg-primary)] transition-colors cursor-pointer text-[var(--m-accent-blue)]">
+              <GitBranch size={10} />
+              <span>{gitBranch}</span>
+              {gitDirtyCount > 0 && <span>*</span>}
+            </div>
+          )}
+
           {/* Cursor position */}
           {activeFilePath && cursorPosition && (
             <span className="font-mono tracking-wide hover:text-[var(--m-fg-primary)] transition-colors cursor-default">

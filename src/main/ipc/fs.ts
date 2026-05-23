@@ -246,4 +246,33 @@ export function registerFsHandlers(): void {
   ipcMain.handle('fs:import-vscode-settings', async () => {
     return await getVsCodeSettings()
   })
+
+  /**
+   * Get Git Information (branch and dirty count)
+   */
+  ipcMain.handle('fs:get-git-info', async (_event, folderPath: string) => {
+    return new Promise((resolve) => {
+      const { exec } = require('child_process')
+      
+      // Get branch name
+      exec('git rev-parse --abbrev-ref HEAD', { cwd: folderPath }, (error: any, stdout: string) => {
+        if (error) {
+          resolve(null) // Not a git repo or git not installed
+          return
+        }
+        
+        const branch = stdout.trim()
+        
+        // Get dirty count
+        exec('git status --porcelain', { cwd: folderPath }, (err: any, out: string) => {
+          let dirtyCount = 0
+          if (!err && out) {
+            // Count non-empty lines
+            dirtyCount = out.split('\n').filter(line => line.trim().length > 0).length
+          }
+          resolve({ branch, dirtyCount })
+        })
+      })
+    })
+  })
 }

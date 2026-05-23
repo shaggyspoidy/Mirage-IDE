@@ -57,6 +57,15 @@ interface WorkspaceState {
 
   /** Save all dirty files to disk */
   saveAllFiles: () => Promise<void>
+
+  /** Close all files */
+  closeAllFiles: () => void
+
+  /** Close all files except the specified one */
+  closeOtherFiles: (path: string) => void
+
+  /** Reorder files in the tab bar */
+  reorderFiles: (startIndex: number, endIndex: number) => void
   
   /** Toggle integrated terminal visibility */
   toggleTerminal: () => void
@@ -84,6 +93,11 @@ interface WorkspaceState {
   /** Toggle command palette visibility */
   isCommandPaletteOpen: boolean
   toggleCommandPalette: () => void
+
+  /** Git Info */
+  gitBranch: string | null
+  gitDirtyCount: number
+  refreshGitInfo: () => Promise<void>
 }
 
 export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
@@ -97,6 +111,8 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   editorInsertCallback: null,
   terminalExecuteCallback: null,
   isCommandPaletteOpen: false,
+  gitBranch: null,
+  gitDirtyCount: 0,
 
   setEditorInstance: (editor) => set({ editorInstance: editor }),
   setEditorInsertCallback: (cb) => set({ editorInsertCallback: cb }),
@@ -104,8 +120,20 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
 
   toggleCommandPalette: () => set((state) => ({ isCommandPaletteOpen: !state.isCommandPaletteOpen })),
 
+  refreshGitInfo: async () => {
+    const { currentFolder } = get()
+    if (!currentFolder || !window.api?.fs?.getGitInfo) return
+    const info = await window.api.fs.getGitInfo(currentFolder)
+    if (info) {
+      set({ gitBranch: info.branch, gitDirtyCount: info.dirtyCount })
+    } else {
+      set({ gitBranch: null, gitDirtyCount: 0 })
+    }
+  },
+
   openFolder: (path: string) => {
     set({ currentFolder: path, openFiles: [], activeFilePath: null })
+    get().refreshGitInfo()
   },
 
   openFile: async (path: string, name: string) => {
@@ -140,6 +168,26 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     set({ openFiles: newOpenFiles, activeFilePath: newActiveFilePath })
   },
 
+  closeAllFiles: () => {
+    set({ openFiles: [], activeFilePath: null })
+  },
+
+  closeOtherFiles: (path: string) => {
+    const { openFiles } = get()
+    const fileToKeep = openFiles.find(f => f.path === path)
+    if (fileToKeep) {
+      set({ openFiles: [fileToKeep], activeFilePath: path })
+    }
+  },
+
+  reorderFiles: (startIndex: number, endIndex: number) => {
+    const { openFiles } = get()
+    const result = Array.from(openFiles)
+    const [removed] = result.splice(startIndex, 1)
+    result.splice(endIndex, 0, removed)
+    set({ openFiles: result })
+  },
+
   setActiveFile: (path: string) => {
     set({ activeFilePath: path })
   },
@@ -159,12 +207,13 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     if (!file || !file.isDirty) return
 
     try {
-      await window.api.fs.writeFile(path, file.content)
-      set({
-        openFiles: openFiles.map(f =>
-          f.path === path ? { ...f, isDirty: false } : f
-        )
-      })
+      const success = await window.api.fs.writeFile(file.path, file.content)
+      if (success !== false) {
+        set({
+          openFiles: openFiles.map(f => f.path === path ? { ...f, isDirty: false } : f)
+        })
+        get().refreshGitInfo()
+      }
     } catch (error) {
       console.error('Failed to save file:', error)
     }
@@ -183,6 +232,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     set({
       openFiles: openFiles.map(f => f.isDirty ? { ...f, isDirty: false } : f)
     })
+    get().refreshGitInfo()
   },
 
   toggleTerminal: () => set(state => ({ isTerminalOpen: !state.isTerminalOpen })),

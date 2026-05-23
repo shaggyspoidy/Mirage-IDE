@@ -25,7 +25,8 @@ const fsApi = {
   delete: (path: string) => ipcRenderer.invoke('fs:delete', path),
   searchFiles: (rootPath: string, query: string) => ipcRenderer.invoke('fs:search-files', rootPath, query),
   getProjectContext: (rootPath: string) => ipcRenderer.invoke('fs:get-project-context', rootPath),
-  importVsCodeSettings: () => ipcRenderer.invoke('fs:import-vscode-settings')
+  importVsCodeSettings: () => ipcRenderer.invoke('fs:import-vscode-settings'),
+  getGitInfo: (folderPath: string) => ipcRenderer.invoke('fs:get-git-info', folderPath)
 }
 
 const windowApi = {

@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Editor, { OnMount, DiffEditor } from '@monaco-editor/react'
 import { Check, X, ChevronRight } from 'lucide-react'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useSettingsStore } from '../../stores/settingsStore'
+import { TabContextMenu } from './TabContextMenu'
 
 /**
  * MonacoPane — The primary text editor component powering the IDE.
@@ -17,11 +18,21 @@ export function MonacoPane(): React.JSX.Element {
     acceptDiff,
     rejectDiff,
     currentFolder,
-    saveFile
+    saveFile,
+    reorderFiles
   } = useWorkspaceStore()
   const { autoSave } = useSettingsStore()
   
   const activeFile = openFiles.find(f => f.path === activeFilePath)
+
+  // Context Menu State
+  const [contextMenu, setContextMenu] = useState<{ x: number, y: number, path: string } | null>(null)
+
+  // Drag and Drop State
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null)
+
+  // Tab container ref for horizontal scrolling
+  const tabContainerRef = useRef<HTMLDivElement>(null)
 
   // Auto-Save logic
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -134,21 +145,50 @@ export function MonacoPane(): React.JSX.Element {
 
   return (
     <div className="flex-1 flex flex-col min-w-0 bg-[var(--m-bg-primary)]">
-      {/* Editor Tabs (Simplistic implementation for now) */}
-      <div className="flex bg-[var(--m-bg-surface)] border-b border-[var(--m-border-primary)] overflow-x-auto no-scrollbar">
-        {openFiles.map(file => (
+      {/* Editor Tabs */}
+      <div 
+        ref={tabContainerRef}
+        className="flex bg-[var(--m-bg-surface)] border-b border-[var(--m-border-primary)] overflow-x-auto no-scrollbar"
+        onWheel={(e) => {
+          if (tabContainerRef.current) {
+            tabContainerRef.current.scrollLeft += e.deltaY;
+          }
+        }}
+      >
+        {openFiles.map((file, idx) => (
           <button
             key={file.path}
+            draggable
+            onDragStart={(e) => {
+              setDraggedIdx(idx)
+              e.dataTransfer.effectAllowed = 'move'
+            }}
+            onDragOver={(e) => {
+              e.preventDefault()
+              e.dataTransfer.dropEffect = 'move'
+            }}
+            onDrop={(e) => {
+              e.preventDefault()
+              if (draggedIdx !== null && draggedIdx !== idx) {
+                reorderFiles(draggedIdx, idx)
+              }
+              setDraggedIdx(null)
+            }}
+            onContextMenu={(e) => {
+              e.preventDefault()
+              setContextMenu({ x: e.clientX, y: e.clientY, path: file.path })
+            }}
             onClick={() => useWorkspaceStore.getState().setActiveFile(file.path)}
             className={`px-4 py-2 text-xs flex items-center gap-2 border-r border-[var(--m-border-primary)] transition-colors min-w-fit
               ${file.path === activeFilePath 
                 ? 'bg-[var(--m-bg-primary)] text-[var(--m-fg-primary)] border-t border-t-[var(--m-accent-blue)]' 
-                : 'text-[var(--m-fg-muted)] hover:bg-[var(--m-hover-bg)] border-t border-t-transparent'}`}
+                : 'text-[var(--m-fg-muted)] hover:bg-[var(--m-hover-bg)] border-t border-t-transparent'}
+              ${draggedIdx === idx ? 'opacity-50' : 'opacity-100'}`}
           >
             {file.name}
-            {file.isDirty && <span className="w-2 h-2 rounded-full bg-[var(--m-accent-yellow)]" />}
+            {file.isDirty && <span className="w-2 h-2 rounded-full bg-[var(--m-accent-yellow)] shrink-0" />}
             <div 
-              className="ml-2 hover:bg-[var(--m-hover-bg)] rounded-md p-0.5"
+              className="ml-2 hover:bg-[var(--m-hover-bg)] rounded-md p-0.5 shrink-0"
               onClick={(e) => {
                 e.stopPropagation()
                 useWorkspaceStore.getState().closeFile(file.path)
@@ -161,6 +201,15 @@ export function MonacoPane(): React.JSX.Element {
           </button>
         ))}
       </div>
+
+      {contextMenu && (
+        <TabContextMenu 
+          x={contextMenu.x} 
+          y={contextMenu.y} 
+          filePath={contextMenu.path} 
+          onClose={() => setContextMenu(null)} 
+        />
+      )}
 
       {/* Breadcrumbs */}
       {activeFile && (
