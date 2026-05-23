@@ -19,7 +19,9 @@ export function MonacoPane(): React.JSX.Element {
     rejectDiff,
     currentFolder,
     saveFile,
-    reorderFiles
+    reorderFiles,
+    gitDiffFile,
+    setGitDiffFile
   } = useWorkspaceStore()
   const { autoSave } = useSettingsStore()
   
@@ -138,6 +140,47 @@ export function MonacoPane(): React.JSX.Element {
           <div className="text-4xl mb-2">✨</div>
           <div className="text-sm font-medium">Mirage IDE</div>
           <div className="text-xs mt-1 opacity-70">Select a file to start editing</div>
+        </div>
+      </div>
+    )
+  }
+
+  // Determine if we're showing a git diff
+  if (gitDiffFile) {
+    const fileName = gitDiffFile.path.split(/[/\\]/).pop() || ''
+    return (
+      <div className="flex-1 flex flex-col min-w-0 bg-[var(--m-bg-primary)]">
+        <div className="flex items-center px-4 py-2 bg-[var(--m-bg-surface)] border-b border-[var(--m-border-primary)] justify-between shrink-0">
+          <div className="flex items-center gap-2 text-sm text-[var(--m-fg-primary)]">
+            <span className="font-mono text-[var(--m-fg-muted)]">Git Diff:</span>
+            <span>{fileName}</span>
+          </div>
+          <button 
+            onClick={() => setGitDiffFile(null)}
+            className="text-[var(--m-fg-muted)] hover:text-[var(--m-fg-primary)] transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
+        <div className="flex-1 min-h-0 relative">
+          <DiffEditor
+            original={gitDiffFile.originalContent}
+            modified={gitDiffFile.modifiedContent}
+            language={getLanguage(fileName)}
+            theme="vs-dark"
+            options={{
+              minimap: { enabled: false },
+              fontSize: 13,
+              fontFamily: 'JetBrainsMono Nerd Font, monospace',
+              wordWrap: 'on',
+              lineHeight: 1.5,
+              padding: { top: 16 },
+              scrollBeyondLastLine: false,
+              renderSideBySide: true,
+              readOnly: true,
+              renderIndicators: true
+            }}
+          />
         </div>
       </div>
     )

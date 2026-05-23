@@ -26,7 +26,13 @@ const fsApi = {
   searchFiles: (rootPath: string, query: string) => ipcRenderer.invoke('fs:search-files', rootPath, query),
   getProjectContext: (rootPath: string) => ipcRenderer.invoke('fs:get-project-context', rootPath),
   importVsCodeSettings: () => ipcRenderer.invoke('fs:import-vscode-settings'),
-  getGitInfo: (folderPath: string) => ipcRenderer.invoke('fs:get-git-info', folderPath)
+  getGitInfo: (folderPath: string) => ipcRenderer.invoke('fs:get-git-info', folderPath),
+  getGitStatus: (folderPath: string) => ipcRenderer.invoke('fs:get-git-status', folderPath),
+  gitCommit: (folderPath: string, message: string) => ipcRenderer.invoke('fs:git-commit', folderPath, message),
+  getFileContentAtHead: (folderPath: string, filePath: string) => ipcRenderer.invoke('fs:get-file-content-at-head', folderPath, filePath),
+  getGitRemotes: (folderPath: string) => ipcRenderer.invoke('fs:git-get-remotes', folderPath),
+  gitPull: (folderPath: string) => ipcRenderer.invoke('fs:git-pull', folderPath),
+  gitPush: (folderPath: string) => ipcRenderer.invoke('fs:git-push', folderPath)
 }
 
 const windowApi = {

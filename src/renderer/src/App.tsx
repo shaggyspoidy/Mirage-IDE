@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { TitleBar } from './components/titlebar/TitleBar'
 import { FileExplorer } from './components/sidebar/FileExplorer'
+import { SourceControl } from './components/sidebar/SourceControl'
 import { MonacoPane } from './components/editor/MonacoPane'
 import { ChatPanel } from './components/ai/ChatPanel'
 import { SettingsPanel } from './components/settings/SettingsPanel'
@@ -11,6 +12,7 @@ import { SearchPanel } from './components/search/SearchPanel'
 import { CommandPalette } from './components/command/CommandPalette'
 import { useWorkspaceStore } from './stores/workspaceStore'
 import { useSettingsStore } from './stores/settingsStore'
+import { Files, GitBranch, Search } from 'lucide-react'
 
 // Resizer component for dragging between panes
 function Resizer({ 
@@ -71,7 +73,7 @@ function Resizer({
  * - StatusBar at the bottom
  */
 function App(): React.JSX.Element {
-  const { isTerminalOpen } = useWorkspaceStore()
+  const { isTerminalOpen, activeSidebarPanel, setSidebarPanel, gitDirtyCount } = useWorkspaceStore()
   const { theme } = useSettingsStore()
   const [isSearchOpen, setIsSearchOpen] = useState(false)
 
@@ -169,12 +171,57 @@ function App(): React.JSX.Element {
     <div className="bg-[var(--m-bg-primary)] overflow-hidden flex flex-col w-screen h-screen relative text-[var(--m-fg-primary)] font-sans">
       <TitleBar />
       
-      {/* Main layout: Sidebar + Editor + Chat */}
+      {/* Main layout: Activity Bar + Sidebar + Editor + Chat */}
       <div className="flex-1 flex overflow-hidden">
         
+        {/* Activity Bar */}
+        <div className="w-12 bg-[var(--m-bg-tertiary)] border-r border-[var(--m-border-primary)] flex flex-col items-center py-2 shrink-0 z-20">
+          <button
+            onClick={() => setSidebarPanel('explorer')}
+            className={`p-3 relative group transition-colors rounded-xl mb-1 ${activeSidebarPanel === 'explorer' ? 'text-[var(--m-fg-primary)]' : 'text-[var(--m-fg-muted)] hover:text-[var(--m-fg-primary)]'}`}
+          >
+            <Files size={22} strokeWidth={1.5} />
+            {activeSidebarPanel === 'explorer' && (
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[var(--m-accent-blue)] rounded-r-full" />
+            )}
+          </button>
+          
+          <button
+            onClick={() => setSidebarPanel('search')}
+            className={`p-3 relative group transition-colors rounded-xl mb-1 ${activeSidebarPanel === 'search' ? 'text-[var(--m-fg-primary)]' : 'text-[var(--m-fg-muted)] hover:text-[var(--m-fg-primary)]'}`}
+          >
+            <Search size={22} strokeWidth={1.5} />
+            {activeSidebarPanel === 'search' && (
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[var(--m-accent-blue)] rounded-r-full" />
+            )}
+          </button>
+
+          <button
+            onClick={() => setSidebarPanel('git')}
+            className={`p-3 relative group transition-colors rounded-xl ${activeSidebarPanel === 'git' ? 'text-[var(--m-fg-primary)]' : 'text-[var(--m-fg-muted)] hover:text-[var(--m-fg-primary)]'}`}
+          >
+            <GitBranch size={22} strokeWidth={1.5} />
+            {gitDirtyCount > 0 && (
+              <div className="absolute top-2 right-2 w-4 h-4 bg-[var(--m-accent-blue)] text-white text-[9px] font-bold flex items-center justify-center rounded-full shadow-lg border-2 border-[var(--m-bg-tertiary)]">
+                {gitDirtyCount > 9 ? '9+' : gitDirtyCount}
+              </div>
+            )}
+            {activeSidebarPanel === 'git' && (
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[var(--m-accent-blue)] rounded-r-full" />
+            )}
+          </button>
+        </div>
+
         {/* Left Sidebar */}
-        <div style={{ width: sidebarWidth }} className="shrink-0 flex flex-col overflow-hidden">
-          <FileExplorer />
+        <div style={{ width: sidebarWidth }} className="shrink-0 flex flex-col overflow-hidden bg-[var(--m-bg-secondary)] border-r border-[var(--m-border-primary)] relative z-10">
+          {activeSidebarPanel === 'explorer' && <FileExplorer />}
+          {activeSidebarPanel === 'git' && <SourceControl />}
+          {activeSidebarPanel === 'search' && (
+            <div className="flex-1 p-4 text-xs text-[var(--m-fg-muted)] flex flex-col items-center justify-center text-center">
+              <Search size={32} className="opacity-20 mb-3" />
+              Search is currently mapped to Ctrl+Shift+F global overlay.
+            </div>
+          )}
         </div>
 
         <Resizer onResize={handleSidebarResize} direction="horizontal" />

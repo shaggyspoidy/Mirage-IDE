@@ -275,4 +275,134 @@ export function registerFsHandlers(): void {
       })
     })
   })
+
+  /**
+   * Get Git Status details (list of changed files)
+   */
+  ipcMain.handle('fs:get-git-status', async (_event, folderPath: string) => {
+    return new Promise((resolve) => {
+      const { exec } = require('child_process')
+      exec('git status --porcelain', { cwd: folderPath }, (error: any, stdout: string) => {
+        if (error) {
+          resolve([])
+          return
+        }
+        
+        const files: { path: string; status: string }[] = []
+        const lines = stdout.split('\n').filter(line => line.length > 0)
+        
+        for (const line of lines) {
+          // git status --porcelain format: "XY filename" or "XY orig -> new"
+          const status = line.substring(0, 2)
+          // Handle renames (e.g., "R  old -> new")
+          const filePath = line.substring(3).split(' -> ').pop()?.trim() || ''
+          
+          if (filePath) {
+            files.push({
+              path: path.join(folderPath, filePath.replace(/^"(.*)"$/, '$1')), // Handle quotes
+              status
+            })
+          }
+        }
+        resolve(files)
+      })
+    })
+  })
+
+  /**
+   * Commit changes (Auto-stages all)
+   */
+  ipcMain.handle('fs:git-commit', async (_event, folderPath: string, message: string) => {
+    return new Promise((resolve, reject) => {
+      const { exec } = require('child_process')
+      // Stage all changes
+      exec('git add .', { cwd: folderPath }, (addError: any) => {
+        if (addError) {
+          reject(new Error(`Git add failed: ${addError.message}`))
+          return
+        }
+        
+        // Escape quotes in commit message
+        const escapedMessage = message.replace(/"/g, '\\"')
+        
+        exec(`git commit -m "${escapedMessage}"`, { cwd: folderPath }, (commitError: any, stdout: string) => {
+          if (commitError) {
+            reject(new Error(`Git commit failed: ${commitError.message}`))
+            return
+          }
+          resolve(stdout)
+        })
+      })
+    })
+  })
+
+  /**
+   * Get file content at HEAD for diffing
+   */
+  ipcMain.handle('fs:get-file-content-at-head', async (_event, folderPath: string, filePath: string) => {
+    return new Promise((resolve) => {
+      const { exec } = require('child_process')
+      // Get path relative to the repo root
+      const relativePath = path.relative(folderPath, filePath).replace(/\\/g, '/')
+      
+      exec(`git show HEAD:"${relativePath}"`, { cwd: folderPath, maxBuffer: 1024 * 1024 * 10 }, (error: any, stdout: string) => {
+        if (error) {
+          // Could be a new file (untracked)
+          resolve('')
+          return
+        }
+        resolve(stdout)
+      })
+    })
+  })
+
+  /**
+   * Check if repository has remote configured
+   */
+  ipcMain.handle('fs:git-get-remotes', async (_event, folderPath: string) => {
+    return new Promise((resolve) => {
+      const { exec } = require('child_process')
+      exec('git remote -v', { cwd: folderPath }, (error: any, stdout: string) => {
+        if (error || !stdout) {
+          resolve(false)
+          return
+        }
+        resolve(stdout.trim().length > 0)
+      })
+    })
+  })
+
+  /**
+   * Git Pull
+   */
+  ipcMain.handle('fs:git-pull', async (_event, folderPath: string) => {
+    return new Promise((resolve, reject) => {
+      const { exec } = require('child_process')
+      exec('git pull', { cwd: folderPath }, (error: any, stdout: string) => {
+        if (error) {
+          reject(new Error(`Git pull failed: ${error.message}`))
+          return
+        }
+        resolve(stdout)
+      })
+    })
+  })
+
+  /**
+   * Git Push
+   */
+  ipcMain.handle('fs:git-push', async (_event, folderPath: string) => {
+    return new Promise((resolve, reject) => {
+      const { exec } = require('child_process')
+      // Note: Assumes current branch tracks a remote
+      exec('git push', { cwd: folderPath }, (error: any, stdout: string, stderr: string) => {
+        if (error) {
+          // git push often outputs to stderr even on success, but if error is set, it failed
+          reject(new Error(`Git push failed: ${stderr || error.message}`))
+          return
+        }
+        resolve(stdout || stderr) // sometimes success message is in stderr
+      })
+    })
+  })
 }

@@ -97,7 +97,16 @@ interface WorkspaceState {
   /** Git Info */
   gitBranch: string | null
   gitDirtyCount: number
+  gitChangedFiles: { path: string; status: string }[]
+  gitDiffFile: { path: string; originalContent: string; modifiedContent: string } | null
+  gitHasRemote: boolean
+  activeSidebarPanel: 'explorer' | 'search' | 'git'
+  setSidebarPanel: (panel: 'explorer' | 'search' | 'git') => void
+  setGitDiffFile: (diff: { path: string; originalContent: string; modifiedContent: string } | null) => void
   refreshGitInfo: () => Promise<void>
+  commitChanges: (message: string) => Promise<void>
+  pushChanges: () => Promise<void>
+  pullChanges: () => Promise<void>
 }
 
 export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
@@ -113,6 +122,10 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   isCommandPaletteOpen: false,
   gitBranch: null,
   gitDirtyCount: 0,
+  gitChangedFiles: [],
+  gitDiffFile: null,
+  gitHasRemote: false,
+  activeSidebarPanel: 'explorer',
 
   setEditorInstance: (editor) => set({ editorInstance: editor }),
   setEditorInsertCallback: (cb) => set({ editorInsertCallback: cb }),
@@ -120,14 +133,55 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
 
   toggleCommandPalette: () => set((state) => ({ isCommandPaletteOpen: !state.isCommandPaletteOpen })),
 
+  setSidebarPanel: (panel) => set({ activeSidebarPanel: panel }),
+  setGitDiffFile: (diff) => set({ gitDiffFile: diff }),
+
   refreshGitInfo: async () => {
     const { currentFolder } = get()
     if (!currentFolder || !window.api?.fs?.getGitInfo) return
     const info = await window.api.fs.getGitInfo(currentFolder)
+    const status = window.api.fs.getGitStatus ? await window.api.fs.getGitStatus(currentFolder) : []
+    const hasRemote = window.api.fs.getGitRemotes ? await window.api.fs.getGitRemotes(currentFolder) : false
+    
     if (info) {
-      set({ gitBranch: info.branch, gitDirtyCount: info.dirtyCount })
+      set({ gitBranch: info.branch, gitDirtyCount: info.dirtyCount, gitChangedFiles: status, gitHasRemote: hasRemote })
     } else {
-      set({ gitBranch: null, gitDirtyCount: 0 })
+      set({ gitBranch: null, gitDirtyCount: 0, gitChangedFiles: [], gitHasRemote: false })
+    }
+  },
+
+  commitChanges: async (message: string) => {
+    const { currentFolder } = get()
+    if (!currentFolder || !window.api?.fs?.gitCommit) return
+    try {
+      await window.api.fs.gitCommit(currentFolder, message)
+      await get().refreshGitInfo()
+    } catch (e) {
+      console.error('Commit failed:', e)
+      throw e
+    }
+  },
+
+  pushChanges: async () => {
+    const { currentFolder } = get()
+    if (!currentFolder || !window.api?.fs?.gitPush) return
+    try {
+      await window.api.fs.gitPush(currentFolder)
+    } catch (e) {
+      console.error('Push failed:', e)
+      throw e
+    }
+  },
+
+  pullChanges: async () => {
+    const { currentFolder } = get()
+    if (!currentFolder || !window.api?.fs?.gitPull) return
+    try {
+      await window.api.fs.gitPull(currentFolder)
+      await get().refreshGitInfo()
+    } catch (e) {
+      console.error('Pull failed:', e)
+      throw e
     }
   },
 
