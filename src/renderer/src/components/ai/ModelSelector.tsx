@@ -96,7 +96,7 @@ export function ModelSelector(): React.JSX.Element {
   // Group models by tier
   const localModels = models.filter((m) => m.tier === 'local')
   const cloudApiModels = models.filter((m) => m.tier === 'cloud-api')
-  const cloudOllamaModels = models.filter((m) => m.tier === 'cloud-ollama')
+
 
   const selectableModels = [
     ...localModels.filter(() => ollamaStatus === 'connected'),
@@ -141,7 +141,7 @@ export function ModelSelector(): React.JSX.Element {
 
   const handleSelectModel = async (model: ModelInfo): Promise<void> => {
     if (model.tier === 'cloud-api') {
-      const { keyStatus, fetchKeyStatus } = useSettingsStore.getState()
+      const { fetchKeyStatus } = useSettingsStore.getState()
       // Ensure we have the latest status
       await fetchKeyStatus()
       const updatedStatus = useSettingsStore.getState().keyStatus

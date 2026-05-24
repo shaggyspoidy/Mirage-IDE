@@ -134,6 +134,12 @@ const aiApi = {
   stopStream: () => ipcRenderer.invoke('ai:stop-stream'),
 
   /**
+   * Fast inline autocomplete (Ghost Text).
+   */
+  getAutocomplete: (modelId: string, prefix: string, suffix: string) => 
+    ipcRenderer.invoke('ai:autocomplete', modelId, prefix, suffix),
+
+  /**
    * Subscribe to model list updates pushed from the main process
    * when background polling detects changes.
    */

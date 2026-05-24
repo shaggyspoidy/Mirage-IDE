@@ -26,7 +26,7 @@ export function SourceControl(): React.JSX.Element {
     if (!currentFolder || !window.api?.fs?.getFileContentAtHead) return
     const originalContent = await window.api.fs.getFileContentAtHead(currentFolder, filePath)
     const modifiedContent = await window.api.fs.readFile(filePath)
-    setGitDiffFile({ path: filePath, originalContent, modifiedContent })
+    setGitDiffFile({ path: filePath, originalContent: originalContent || '', modifiedContent })
   }
 
   const getIconForStatus = (status: string) => {

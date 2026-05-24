@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Download, Terminal, CheckCircle2, Loader2 } from 'lucide-react'
+import { X, Download, Terminal, Loader2 } from 'lucide-react'
 import { useModelStore } from '../../stores/modelStore'
 
 const POPULAR_MODELS = [

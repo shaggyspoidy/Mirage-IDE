@@ -17,7 +17,21 @@ interface FsApi {
   readDir: (path: string) => Promise<FileEntry[]>
   readFile: (path: string) => Promise<string>
   writeFile: (path: string, content: string) => Promise<void>
+  createDir: (path: string) => Promise<void>
+  rename: (oldPath: string, newPath: string) => Promise<void>
+  delete: (path: string) => Promise<void>
+  searchFiles: (rootPath: string, query: string) => Promise<any[]>
   importVsCodeSettings: () => Promise<any>
+  getProjectContext: (workspacePath: string, maxFiles?: number) => Promise<{ tree: string; files: { path: string; relativePath: string; content: string; }[] }>
+
+  // Git features
+  getGitInfo: (dirPath: string) => Promise<any>
+  getGitStatus: (dirPath: string) => Promise<any>
+  getGitRemotes: (dirPath: string) => Promise<any>
+  gitCommit: (dirPath: string, message: string) => Promise<void>
+  gitPush: (dirPath: string) => Promise<void>
+  gitPull: (dirPath: string) => Promise<void>
+  getFileContentAtHead: (dirPath: string, filePath: string) => Promise<string | null>
 }
 
 interface WindowApi {
@@ -62,8 +76,16 @@ interface AiApi {
   getStatus: () => Promise<OllamaStatus>
   getSelectedModel: () => Promise<string | null>
   chat: (modelId: string, messages: { role: string; content: string }[]) => Promise<{ role: string; content: string }>
+  chatStream: (modelId: string, messages: { role: string; content: string }[]) => Promise<void>
+  stopStream: () => Promise<void>
+  getAutocomplete: (modelId: string, prefix: string, suffix: string) => Promise<string>
+  installModel: (modelId: string) => Promise<boolean>
   onModelsUpdated: (callback: (models: ModelInfo[]) => void) => () => void
   onStatusChanged: (callback: (status: OllamaStatus) => void) => () => void
+  onStreamChunk: (callback: (token: string) => void) => () => void
+  onStreamDone: (callback: (fullContent: string) => void) => () => void
+  onStreamError: (callback: (error: string) => void) => () => void
+  onModelFallback: (callback: (newModelId: string) => void) => () => void
 }
 
 interface SettingsApi {
@@ -72,12 +94,21 @@ interface SettingsApi {
   deleteKey: (provider: 'openai' | 'anthropic' | 'google') => Promise<boolean>
 }
 
+interface TerminalApi {
+  spawn: (cols: number, rows: number, cwd?: string) => void
+  write: (data: string) => void
+  resize: (cols: number, rows: number) => void
+  kill: () => void
+  onData: (callback: (data: string) => void) => () => void
+}
+
 interface MirageApi {
   fs: FsApi
   window: WindowApi
   dialog: DialogApi
   ai: AiApi
   settings: SettingsApi
+  terminal: TerminalApi
 }
 
 declare global {

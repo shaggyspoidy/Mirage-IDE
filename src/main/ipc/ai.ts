@@ -2,6 +2,7 @@ import { ipcMain, BrowserWindow } from 'electron'
 import { ollamaService } from '../services/ollama-service'
 import { modelRegistry } from '../services/model-registry'
 import { providerFactory } from '../services/ai-providers/provider-factory'
+import { keyManager } from '../services/key-manager'
 import type { OllamaModel } from '../../shared/types/model'
 
 /**
@@ -249,6 +250,33 @@ export function registerAiHandlers(): void {
       providerFactory.getClient('google').stopStream()
     } catch (e) {
       // Ignore if clients aren't initialized
+    }
+  })
+
+  /**
+   * Fast inline autocomplete (Ghost Text).
+   */
+  ipcMain.handle('ai:autocomplete', async (_event, modelId: string, prefix: string, suffix: string) => {
+    const model = modelRegistry.getModelById(modelId)
+    if (!model) throw new Error(`Model ${modelId} not found.`)
+
+    const prompt = `You are a code autocomplete engine. Your only job is to output EXACTLY the code that belongs between the Prefix and the Suffix. Do NOT output markdown backticks, explanations, or any conversational text. ONLY output the missing code.
+
+Prefix:
+${prefix}
+
+Suffix:
+${suffix}
+
+Missing code:`
+
+    if (model.provider === 'ollama') {
+      const response = await ollamaService.chat(model.name, [{ role: 'user', content: prompt }])
+      return response.content
+    } else {
+      const client = providerFactory.getClient(model.provider)
+      const response = await client.chat(model.name, [{ role: 'user', content: prompt }])
+      return response.content
     }
   })
 }

@@ -70,6 +70,9 @@ interface WorkspaceState {
   /** Toggle integrated terminal visibility */
   toggleTerminal: () => void
 
+  /** Set integrated terminal visibility */
+  setTerminalOpen: (isOpen: boolean) => void
+
   /** Insert text at the current cursor position in the active editor */
   insertAtCursor: (content: string) => void
 
@@ -261,13 +264,11 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     if (!file || !file.isDirty) return
 
     try {
-      const success = await window.api.fs.writeFile(file.path, file.content)
-      if (success !== false) {
-        set({
-          openFiles: openFiles.map(f => f.path === path ? { ...f, isDirty: false } : f)
-        })
-        get().refreshGitInfo()
-      }
+      await window.api.fs.writeFile(file.path, file.content)
+      set({
+        openFiles: openFiles.map(f => f.path === path ? { ...f, isDirty: false } : f)
+      })
+      get().refreshGitInfo()
     } catch (error) {
       console.error('Failed to save file:', error)
     }
@@ -290,6 +291,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   },
 
   toggleTerminal: () => set(state => ({ isTerminalOpen: !state.isTerminalOpen })),
+  setTerminalOpen: (isOpen: boolean) => set({ isTerminalOpen: isOpen }),
 
   insertAtCursor: (content: string) => {
     const { editorInsertCallback } = get()
@@ -344,7 +346,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   },
 
   acceptDiff: async (path: string) => {
-    const { pendingDiffs, activeFilePath, updateFileContent, saveFile } = get()
+    const { pendingDiffs, updateFileContent, saveFile } = get()
     const newContent = pendingDiffs[path]
     if (newContent !== undefined) {
       // 1. Update in memory (marks dirty)
@@ -366,7 +368,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   },
 
   executeCommand: (cmd: string) => {
-    const { terminalExecuteCallback, isTerminalOpen } = get()
+    const { isTerminalOpen } = get()
     // Open terminal if closed
     if (!isTerminalOpen) {
       set({ isTerminalOpen: true })

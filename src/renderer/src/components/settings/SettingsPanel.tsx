@@ -82,18 +82,36 @@ export function SettingsPanel(): React.JSX.Element | null {
             <p className="text-xs text-[var(--m-fg-primary)] opacity-80 mb-2">
               Configure code editor behavior.
             </p>
-            <label className="flex items-center gap-3 cursor-pointer">
-              <div className="relative">
-                <input 
-                  type="checkbox" 
-                  className="sr-only peer"
-                  checked={useSettingsStore.getState().autoSave}
-                  onChange={(e) => useSettingsStore.getState().setAutoSave(e.target.checked)}
-                />
-                <div className="w-9 h-5 bg-[var(--m-border-primary)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--m-accent-blue)]"></div>
-              </div>
-              <span className="text-sm text-[var(--m-fg-primary)] font-medium">Auto-Save (on delay)</span>
-            </label>
+            <div className="flex flex-col gap-3">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div className="relative">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer"
+                    checked={useSettingsStore.getState().autoSave}
+                    onChange={(e) => useSettingsStore.getState().setAutoSave(e.target.checked)}
+                  />
+                  <div className="w-9 h-5 bg-[var(--m-border-primary)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--m-accent-blue)]"></div>
+                </div>
+                <span className="text-sm text-[var(--m-fg-primary)] font-medium">Auto-Save (on delay)</span>
+              </label>
+
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div className="relative">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer"
+                    checked={useSettingsStore.getState().inlineAutocomplete}
+                    onChange={(e) => useSettingsStore.getState().setInlineAutocomplete(e.target.checked)}
+                  />
+                  <div className="w-9 h-5 bg-[var(--m-border-primary)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--m-accent-blue)]"></div>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm text-[var(--m-fg-primary)] font-medium">AI Inline Autocomplete</span>
+                  <span className="text-xs text-[var(--m-fg-muted)]">Shows "ghost text" suggestions as you type</span>
+                </div>
+              </label>
+            </div>
           </div>
 
         </div>

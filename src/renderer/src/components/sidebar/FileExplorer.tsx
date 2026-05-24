@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { ChevronRight, ChevronDown, File, Folder, FolderOpen, FilePlus, FolderPlus, Pencil, Trash2, Settings } from 'lucide-react'
+import { ChevronRight, ChevronDown, File, Folder, FolderOpen, FilePlus, FolderPlus, Pencil, Trash2 } from 'lucide-react'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
-import { useSettingsStore } from '../../stores/settingsStore'
 
 interface FileEntry {
   name: string
@@ -68,12 +67,7 @@ function ContextMenu({
     }
   }
 
-  const getParentDir = (): string => {
-    const sep = entry.path.includes('/') ? '/' : '\\'
-    const parts = entry.path.split(sep)
-    parts.pop()
-    return parts.join(sep)
-  }
+
 
   return (
     <div

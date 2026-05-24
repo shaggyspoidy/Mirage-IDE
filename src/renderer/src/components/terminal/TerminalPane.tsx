@@ -55,7 +55,7 @@ export function TerminalPane(): React.JSX.Element {
       })
     }
 
-    // Handle resize
+    // Handle resize using ResizeObserver for both window and panel resizes
     const handleResize = () => {
       if (fitAddonRef.current && xtermRef.current) {
         fitAddonRef.current.fit()
@@ -65,7 +65,11 @@ export function TerminalPane(): React.JSX.Element {
       }
     }
     
-    window.addEventListener('resize', handleResize)
+    const resizeObserver = new ResizeObserver(() => {
+      // Small debounce for ResizeObserver
+      requestAnimationFrame(() => handleResize())
+    })
+    resizeObserver.observe(terminalRef.current)
 
     // Register execution callback
     useWorkspaceStore.getState().setTerminalExecuteCallback((cmd: string) => {
@@ -76,7 +80,7 @@ export function TerminalPane(): React.JSX.Element {
     })
 
     return () => {
-      window.removeEventListener('resize', handleResize)
+      resizeObserver.disconnect()
       useWorkspaceStore.getState().setTerminalExecuteCallback(null)
       if (removeListener) removeListener()
       if (window.api && window.api.terminal) {

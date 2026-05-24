@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import Editor, { OnMount, DiffEditor } from '@monaco-editor/react'
-import { Check, X, ChevronRight } from 'lucide-react'
+import { Check, X, ChevronRight, Play } from 'lucide-react'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useSettingsStore } from '../../stores/settingsStore'
+import { useModelStore } from '../../stores/modelStore'
 import { TabContextMenu } from './TabContextMenu'
+
+// A ref to keep track of autocomplete debouncing
+let autocompleteTimeout: ReturnType<typeof setTimeout> | null = null;
+let providerRegistered = false;
 
 /**
  * MonacoPane — The primary text editor component powering the IDE.
@@ -99,6 +104,44 @@ export function MonacoPane(): React.JSX.Element {
       default: return 'plaintext'
     }
   }
+  const handleRunCode = () => {
+    if (!activeFile) return
+    const ext = activeFile.path.split('.').pop()?.toLowerCase()
+    let cmd = ''
+    switch (ext) {
+      case 'ts':
+        cmd = `ts-node "${activeFile.path}"`
+        break
+      case 'js':
+        cmd = `node "${activeFile.path}"`
+        break
+      case 'py':
+        cmd = `python "${activeFile.path}"`
+        break
+      case 'go':
+        cmd = `go run "${activeFile.path}"`
+        break
+      case 'rs':
+        cmd = `rustc "${activeFile.path}" && .\\${activeFile.name.replace('.rs', '.exe')}`
+        break
+      default:
+        console.warn('No runner found for extension:', ext)
+        return
+    }
+
+    // Open terminal if closed
+    useWorkspaceStore.getState().setTerminalOpen(true)
+    
+    // Execute command
+    setTimeout(() => {
+      const execute = useWorkspaceStore.getState().terminalExecuteCallback
+      if (execute) {
+        execute(cmd)
+      } else {
+        console.warn('Terminal not ready for execution')
+      }
+    }, 100)
+  }
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
     // Store editor instance for menu bar actions
@@ -131,6 +174,76 @@ export function MonacoPane(): React.JSX.Element {
     editor.onDidChangeCursorPosition((e) => {
       useWorkspaceStore.getState().setCursorPosition(e.position.lineNumber, e.position.column)
     })
+
+    // Register Inline Autocomplete Provider ONCE
+    if (!providerRegistered) {
+      providerRegistered = true;
+      monaco.languages.registerInlineCompletionsProvider('*', {
+        provideInlineCompletions: async (model, position, _context, token) => {
+          // Check settings toggle
+          if (!useSettingsStore.getState().inlineAutocomplete) {
+            return { items: [] };
+          }
+
+          // Check if AI model is selected
+          const selectedModelId = useModelStore.getState().selectedModelId;
+          if (!selectedModelId) {
+            return { items: [] };
+          }
+
+          // Return a promise that resolves after debounce
+          return new Promise((resolve) => {
+            if (autocompleteTimeout) clearTimeout(autocompleteTimeout);
+            
+            // If user cancels (types another key), abort early
+            token.onCancellationRequested(() => {
+              if (autocompleteTimeout) clearTimeout(autocompleteTimeout);
+              resolve({ items: [] });
+            });
+
+            autocompleteTimeout = setTimeout(async () => {
+              try {
+                // Get text context
+                const prefix = model.getValueInRange({
+                  startLineNumber: 1,
+                  startColumn: 1,
+                  endLineNumber: position.lineNumber,
+                  endColumn: position.column
+                });
+                
+                const suffix = model.getValueInRange({
+                  startLineNumber: position.lineNumber,
+                  startColumn: position.column,
+                  endLineNumber: model.getLineCount(),
+                  endColumn: model.getLineMaxColumn(model.getLineCount())
+                });
+
+                // Take last 500 chars of prefix and first 500 chars of suffix to keep it fast
+                const truncatedPrefix = prefix.slice(-500);
+                const truncatedSuffix = suffix.slice(0, 500);
+
+                const completionText = await window.api.ai.getAutocomplete(selectedModelId, truncatedPrefix, truncatedSuffix);
+                
+                if (completionText && completionText.trim()) {
+                  resolve({
+                    items: [{
+                      insertText: completionText,
+                      range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column)
+                    }]
+                  });
+                } else {
+                  resolve({ items: [] });
+                }
+              } catch (err) {
+                console.error('[Autocomplete Error]', err);
+                resolve({ items: [] });
+              }
+            }, 600); // 600ms debounce
+          });
+        },
+        freeInlineCompletions: () => {}
+      });
+    }
   }
 
   if (!activeFile) {
@@ -187,7 +300,7 @@ export function MonacoPane(): React.JSX.Element {
   }
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-[var(--m-bg-primary)]">
+    <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-[var(--m-bg-primary)]">
       {/* Editor Tabs */}
       <div 
         ref={tabContainerRef}
@@ -243,6 +356,18 @@ export function MonacoPane(): React.JSX.Element {
             </div>
           </button>
         ))}
+      </div>
+
+      {/* Editor Actions Toolbar */}
+      <div className="absolute top-2 right-4 z-10 flex items-center gap-2">
+        <button
+          onClick={handleRunCode}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--m-accent-blue)] hover:bg-blue-500 text-white text-xs font-semibold rounded shadow-md transition-colors"
+          title="Run Code"
+        >
+          <Play size={14} className="fill-current" />
+          <span>Run</span>
+        </button>
       </div>
 
       {contextMenu && (

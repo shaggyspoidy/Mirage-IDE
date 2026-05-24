@@ -66,7 +66,7 @@ export function ChatInput(): React.JSX.Element {
         
         // Prevent duplicates
         if (!attachments.find(a => a.path === result.path)) {
-          setAttachments(prev => [...prev, { name: filename, path: result.path }])
+          setAttachments(prev => [...prev, { name: filename, path: result.path as string }])
         }
       }
     } catch (error) {

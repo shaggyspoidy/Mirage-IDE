@@ -5,7 +5,7 @@ import { ChatMessage } from './ChatMessage'
 import { ChatInput } from './ChatInput'
 
 export function ChatPanel(): React.JSX.Element {
-  const { messages, streamingContent, isGenerating, clearMessages } = useContextStore()
+  const { messages, streamingContent, clearMessages } = useContextStore()
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll to bottom on new messages or streaming content

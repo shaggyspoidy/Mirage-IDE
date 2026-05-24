@@ -15,6 +15,9 @@ interface SettingsState {
   
   autoSave: boolean
   setAutoSave: (enabled: boolean) => void
+  
+  inlineAutocomplete: boolean
+  setInlineAutocomplete: (enabled: boolean) => void
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -22,6 +25,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   keyStatus: {},
   theme: localStorage.getItem('mirage-theme') || 'dark',
   autoSave: localStorage.getItem('mirage-autosave') !== 'false', // Default to true
+  inlineAutocomplete: localStorage.getItem('mirage-inline-autocomplete') !== 'false', // Default to true
 
   setTheme: (theme: string) => {
     localStorage.setItem('mirage-theme', theme)
@@ -32,6 +36,11 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   setAutoSave: (enabled: boolean) => {
     localStorage.setItem('mirage-autosave', enabled.toString())
     set({ autoSave: enabled })
+  },
+
+  setInlineAutocomplete: (enabled: boolean) => {
+    localStorage.setItem('mirage-inline-autocomplete', enabled.toString())
+    set({ inlineAutocomplete: enabled })
   },
 
   toggleSettings: () => set((state) => ({ isSettingsOpen: !state.isSettingsOpen })),
