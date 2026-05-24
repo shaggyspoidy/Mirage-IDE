@@ -4,8 +4,9 @@ import { DocSection } from './DocSection'
 import { editorShortcuts } from './content/editor-shortcuts'
 import { aiFeatures } from './content/ai-features'
 import { modelManagement } from './content/model-management'
+import { vimModeDocs } from './content/vim-mode'
 
-type SectionId = 'shortcuts' | 'ai' | 'models'
+type SectionId = 'shortcuts' | 'ai' | 'models' | 'vim'
 
 export function DocumentationPanel(): React.JSX.Element {
   const [activeSection, setActiveSection] = useState<SectionId>('shortcuts')
@@ -14,6 +15,7 @@ export function DocumentationPanel(): React.JSX.Element {
   const allSections = useMemo(() => {
     return [
       { id: 'shortcuts' as SectionId, title: 'Editor & Shortcuts', data: editorShortcuts },
+      { id: 'vim' as SectionId, title: 'Vim Mode', data: vimModeDocs },
       { id: 'ai' as SectionId, title: 'AI Features', data: aiFeatures },
       { id: 'models' as SectionId, title: 'Model Management', data: modelManagement }
     ]

@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events'
-import { spawn } from 'child_process'
 import type {
   OllamaModel,
   OllamaTagsResponse,

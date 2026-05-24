@@ -18,6 +18,9 @@ interface SettingsState {
   
   inlineAutocomplete: boolean
   setInlineAutocomplete: (enabled: boolean) => void
+
+  vimMode: boolean
+  setVimMode: (enabled: boolean) => void
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -26,6 +29,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   theme: localStorage.getItem('mirage-theme') || 'dark',
   autoSave: localStorage.getItem('mirage-autosave') !== 'false', // Default to true
   inlineAutocomplete: localStorage.getItem('mirage-inline-autocomplete') !== 'false', // Default to true
+  vimMode: localStorage.getItem('mirage-vim-mode') === 'true', // Default to false
 
   setTheme: (theme: string) => {
     localStorage.setItem('mirage-theme', theme)
@@ -41,6 +45,11 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   setInlineAutocomplete: (enabled: boolean) => {
     localStorage.setItem('mirage-inline-autocomplete', enabled.toString())
     set({ inlineAutocomplete: enabled })
+  },
+
+  setVimMode: (enabled: boolean) => {
+    localStorage.setItem('mirage-vim-mode', enabled.toString())
+    set({ vimMode: enabled })
   },
 
   toggleSettings: () => set((state) => ({ isSettingsOpen: !state.isSettingsOpen })),

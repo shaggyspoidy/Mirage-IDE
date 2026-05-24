@@ -5,6 +5,8 @@ import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { useModelStore } from '../../stores/modelStore'
 import { TabContextMenu } from './TabContextMenu'
+// @ts-ignore
+import { initVimMode, VimMode } from 'monaco-vim'
 
 // A ref to keep track of autocomplete debouncing
 let autocompleteTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -26,11 +28,17 @@ export function MonacoPane(): React.JSX.Element {
     saveFile,
     reorderFiles,
     gitDiffFile,
-    setGitDiffFile
+    setGitDiffFile,
+    editorInstance
   } = useWorkspaceStore()
-  const { autoSave } = useSettingsStore()
+  const { autoSave, vimMode } = useSettingsStore()
   
   const activeFile = openFiles.find(f => f.path === activeFilePath)
+
+  // Vim Mode State
+  const vimInstanceRef = useRef<any>(null)
+  const vimStatusNodeRef = useRef<HTMLDivElement>(null)
+  const [currentVimMode, setCurrentVimMode] = useState('NORMAL')
 
   // Context Menu State
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number, path: string } | null>(null)
@@ -54,6 +62,112 @@ export function MonacoPane(): React.JSX.Element {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
     }
   }, [activeFile?.content, activeFile?.isDirty, autoSave, activeFile?.path, saveFile])
+
+  // Vim Mode lifecycle
+  useEffect(() => {
+    if (vimMode && editorInstance && vimStatusNodeRef.current) {
+      // Initialize monaco-vim
+      if (!vimInstanceRef.current) {
+        vimInstanceRef.current = initVimMode(editorInstance, vimStatusNodeRef.current)
+        
+        // Register Vim Command Mode (Ex commands)
+        const VimModeObj = VimMode as any
+        if (VimModeObj && VimModeObj.Vim) {
+          VimModeObj.Vim.defineEx('write', 'w', () => {
+            const currentPath = useWorkspaceStore.getState().activeFilePath
+            if (currentPath) {
+              useWorkspaceStore.getState().saveFile(currentPath)
+            }
+          })
+          
+          VimModeObj.Vim.defineEx('quit', 'q', () => {
+            const currentPath = useWorkspaceStore.getState().activeFilePath
+            if (currentPath) {
+              useWorkspaceStore.getState().closeFile(currentPath)
+            }
+          })
+
+          VimModeObj.Vim.defineEx('wq', 'wq', () => {
+            const currentPath = useWorkspaceStore.getState().activeFilePath
+            if (currentPath) {
+              useWorkspaceStore.getState().saveFile(currentPath)
+              useWorkspaceStore.getState().closeFile(currentPath)
+            }
+          })
+        }
+      }
+
+      // Helper to process the status bar DOM
+      const processStatusBar = () => {
+        const node = vimStatusNodeRef.current
+        if (node && node.children.length > 1) {
+          const modeSpan = node.children[0] as HTMLElement
+          const inputSpan = node.children[1] as HTMLElement
+
+          if (modeSpan) modeSpan.className = 'vim-mode-badge'
+          if (inputSpan) inputSpan.className = 'vim-cmd-input'
+
+          const rawText = modeSpan?.textContent || ''
+          if (rawText.startsWith('--') && rawText.endsWith('--')) {
+            const cleanText = rawText.replace(/-/g, '')
+            if (modeSpan.textContent !== cleanText) {
+              modeSpan.textContent = cleanText
+            }
+          }
+
+          if (inputSpan && inputSpan.innerHTML.includes('<input')) {
+            setCurrentVimMode('COMMAND')
+            if (modeSpan.textContent !== 'COMMAND') {
+              modeSpan.textContent = 'COMMAND'
+            }
+          } else {
+            const currentText = modeSpan?.textContent || 'NORMAL'
+            setCurrentVimMode(currentText)
+          }
+        }
+      }
+
+      // Add a MutationObserver to intercept and clean up the status bar text
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList' || mutation.type === 'characterData') {
+            processStatusBar()
+          }
+        })
+      })
+
+      observer.observe(vimStatusNodeRef.current, {
+        childList: true,
+        subtree: true,
+        characterData: true
+      })
+
+      // Run once immediately to catch the initial state
+      processStatusBar()
+
+      return () => {
+        observer.disconnect()
+        if (vimInstanceRef.current) {
+          vimInstanceRef.current.dispose()
+          vimInstanceRef.current = null
+        }
+      }
+    } else {
+      // Cleanup monaco-vim when vimMode is toggled off
+      if (vimInstanceRef.current) {
+        vimInstanceRef.current.dispose()
+        vimInstanceRef.current = null
+      }
+    }
+    
+    return () => {
+      // Fallback cleanup
+      if (vimInstanceRef.current) {
+        vimInstanceRef.current.dispose()
+        vimInstanceRef.current = null
+      }
+    }
+  }, [vimMode, editorInstance, activeFilePath])
 
   // Derive breadcrumbs from path
   const getBreadcrumbs = (path: string) => {
@@ -454,6 +568,20 @@ export function MonacoPane(): React.JSX.Element {
             }}
           />
         )}
+
+        {/* Vim Status Bar Overlay */}
+        <div 
+          ref={vimStatusNodeRef}
+          className={`vim-status-node absolute bottom-0 left-0 right-0 py-0 font-mono text-[11px] bg-[var(--m-bg-secondary)] border-t border-[var(--m-border-primary)] text-[var(--m-fg-primary)] z-20 flex items-center transition-opacity duration-200 ${vimMode ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+          style={{
+            // @ts-ignore
+            '--vim-color': 
+              currentVimMode === 'INSERT' ? 'var(--m-accent-yellow)' :
+              currentVimMode.startsWith('V') ? 'var(--m-accent-purple)' :
+              currentVimMode === 'COMMAND' ? 'var(--m-accent-blue)' :
+              'var(--m-accent-green)'
+          }}
+        />
       </div>
     </div>
   )

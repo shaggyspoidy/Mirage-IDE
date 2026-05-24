@@ -101,9 +101,23 @@ export function TitleBar(): React.JSX.Element {
           <span>Run</span>
         </button>
       </div>
+      {/* Right section: Window Controls & Extras */}
+      <div className="flex items-center no-drag">
+        {/* Vim Toggle */}
+        <div className="flex items-center gap-2 mr-3 border-r border-[var(--m-border-primary)] pr-3">
+          <span className="text-[10px] uppercase font-bold tracking-wider text-[var(--m-fg-muted)]">Vim</span>
+          <button
+            onClick={() => useSettingsStore.getState().setVimMode(!useSettingsStore.getState().vimMode)}
+            className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none ${useSettingsStore((state) => state.vimMode) ? 'bg-[var(--m-accent-green)]' : 'bg-[#00000040] border border-[var(--m-border-primary)]'}`}
+          >
+            <span
+              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${useSettingsStore((state) => state.vimMode) ? 'translate-x-3.5' : 'translate-x-0.5'}`}
+            />
+          </button>
+        </div>
 
-      {/* Right section: Window Controls */}
-      <WindowControls />
+        <WindowControls />
+      </div>
     </div>
   )
 }

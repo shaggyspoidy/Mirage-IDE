@@ -116,3 +116,41 @@ html, body {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* Custom Vim Status Bar Styling */
+.vim-status-node {
+  /* Dynamic color applied via style inline */
+}
+.vim-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  height: 22px;
+  background-color: var(--vim-color, var(--m-accent-green));
+  color: #1a1b26; /* Dark text for contrast */
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  position: relative;
+  z-index: 10;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%);
+  padding-right: 20px; /* Space for the arrow */
+}
+.vim-cmd-input {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 8px;
+  flex: 1;
+}
+.vim-cmd-input input {
+  background: transparent;
+  border: none;
+  color: var(--m-fg-primary);
+  outline: none;
+  width: 100%;
+  font-family: inherit;
+  font-size: inherit;
+}
+.vim-cmd-input input::selection {
+  background: var(--m-bg-overlay);
+}
