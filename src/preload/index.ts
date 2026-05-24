@@ -127,6 +127,11 @@ const aiApi = {
    * Install/pull a missing Ollama model.
    */
   installModel: (modelId: string) => ipcRenderer.invoke('ai:install-model', modelId),
+  onInstallProgress: (callback: (progress: { modelId: string, status: string, progress: number }) => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, progress: { modelId: string, status: string, progress: number }) => callback(progress)
+    ipcRenderer.on('ai:install-progress', handler)
+    return () => ipcRenderer.removeListener('ai:install-progress', handler)
+  },
 
   /**
    * Stop the currently active AI stream.

@@ -86,6 +86,7 @@ interface AiApi {
   onStreamDone: (callback: (fullContent: string) => void) => () => void
   onStreamError: (callback: (error: string) => void) => () => void
   onModelFallback: (callback: (newModelId: string) => void) => () => void
+  onInstallProgress: (callback: (progress: { modelId: string, status: string, progress: number }) => void) => () => void
 }
 
 interface SettingsApi {

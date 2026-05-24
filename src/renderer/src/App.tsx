@@ -12,7 +12,8 @@ import { SearchPanel } from './components/search/SearchPanel'
 import { CommandPalette } from './components/command/CommandPalette'
 import { useWorkspaceStore } from './stores/workspaceStore'
 import { useSettingsStore } from './stores/settingsStore'
-import { Files, GitBranch, Search, Settings } from 'lucide-react'
+import { Files, GitBranch, Search, Settings, BookOpen } from 'lucide-react'
+import { DocumentationPanel } from './components/docs/DocumentationPanel'
 
 // Resizer component for dragging between panes
 function Resizer({ 
@@ -208,7 +209,7 @@ function App(): React.JSX.Element {
 
           <button
             onClick={() => setSidebarPanel('git')}
-            className={`p-3 relative group transition-colors rounded-xl ${activeSidebarPanel === 'git' ? 'text-[var(--m-fg-primary)]' : 'text-[var(--m-fg-muted)] hover:text-[var(--m-fg-primary)]'}`}
+            className={`p-3 relative group transition-colors rounded-xl mb-1 ${activeSidebarPanel === 'git' ? 'text-[var(--m-fg-primary)]' : 'text-[var(--m-fg-muted)] hover:text-[var(--m-fg-primary)]'}`}
           >
             <GitBranch size={22} strokeWidth={1.5} />
             {gitDirtyCount > 0 && (
@@ -217,6 +218,17 @@ function App(): React.JSX.Element {
               </div>
             )}
             {activeSidebarPanel === 'git' && (
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[var(--m-accent-blue)] rounded-r-full" />
+            )}
+          </button>
+          
+          <button
+            onClick={() => setSidebarPanel('docs')}
+            className={`p-3 relative group transition-colors rounded-xl ${activeSidebarPanel === 'docs' ? 'text-[var(--m-fg-primary)]' : 'text-[var(--m-fg-muted)] hover:text-[var(--m-fg-primary)]'}`}
+            title="Documentation"
+          >
+            <BookOpen size={22} strokeWidth={1.5} />
+            {activeSidebarPanel === 'docs' && (
               <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[var(--m-accent-blue)] rounded-r-full" />
             )}
           </button>
@@ -236,6 +248,7 @@ function App(): React.JSX.Element {
         <div style={{ width: sidebarWidth }} className="shrink-0 flex flex-col overflow-hidden bg-[var(--m-bg-secondary)] border-r border-[var(--m-border-primary)] relative z-10">
           {activeSidebarPanel === 'explorer' && <FileExplorer />}
           {activeSidebarPanel === 'git' && <SourceControl />}
+          {activeSidebarPanel === 'docs' && <DocumentationPanel />}
           {activeSidebarPanel === 'search' && (
             <div className="flex-1 p-4 text-xs text-[var(--m-fg-muted)] flex flex-col items-center justify-center text-center">
               <Search size={32} className="opacity-20 mb-3" />

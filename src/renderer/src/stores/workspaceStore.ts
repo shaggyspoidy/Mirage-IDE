@@ -103,8 +103,8 @@ interface WorkspaceState {
   gitChangedFiles: { path: string; status: string }[]
   gitDiffFile: { path: string; originalContent: string; modifiedContent: string } | null
   gitHasRemote: boolean
-  activeSidebarPanel: 'explorer' | 'search' | 'git'
-  setSidebarPanel: (panel: 'explorer' | 'search' | 'git') => void
+  activeSidebarPanel: 'explorer' | 'search' | 'git' | 'docs'
+  setSidebarPanel: (panel: 'explorer' | 'search' | 'git' | 'docs') => void
   setGitDiffFile: (diff: { path: string; originalContent: string; modifiedContent: string } | null) => void
   refreshGitInfo: () => Promise<void>
   commitChanges: (message: string) => Promise<void>

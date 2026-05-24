@@ -338,28 +338,53 @@ class OllamaService extends EventEmitter {
   /**
    * Pull a model from the Ollama registry.
    */
-  async pullModel(modelName: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      console.log(`[Ollama] Pulling model: ${modelName}`)
-      
-      // On Windows, use shell: true to ensure 'ollama' resolves via PATH correctly
-      const proc = spawn('ollama', ['pull', modelName], { shell: true })
-      
-      proc.on('close', (code) => {
-        if (code === 0) {
-          console.log(`[Ollama] Successfully pulled ${modelName}`)
-          this.listModels() // Refresh the model list so it shows up immediately
-          resolve()
-        } else {
-          reject(new Error(`Ollama pull failed with exit code ${code}`))
-        }
-      })
-      
-      proc.on('error', (err) => {
-        console.error(`[Ollama] Error spawning pull process:`, err)
-        reject(err)
-      })
+  async pullModel(modelName: string, onProgress?: (status: string, progress: number) => void): Promise<void> {
+    console.log(`[Ollama] Pulling model via API: ${modelName}`)
+    const response = await fetch(`${OLLAMA_BASE_URL}/api/pull`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: modelName, stream: true })
     })
+
+    if (!response.ok) {
+      throw new Error(`Failed to pull model: ${response.statusText}`)
+    }
+
+    if (!response.body) {
+      throw new Error('No response body stream')
+    }
+
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder('utf-8')
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || ''
+      
+      for (const line of lines) {
+        if (!line.trim()) continue
+        try {
+          const data = JSON.parse(line)
+          if (data.status && onProgress) {
+            let progress = 0
+            if (data.total && data.completed) {
+              progress = Math.round((data.completed / data.total) * 100)
+            }
+            onProgress(data.status, progress)
+          }
+        } catch (e) {
+          // ignore parse errors for chunks
+        }
+      }
+    }
+
+    console.log(`[Ollama] Successfully pulled ${modelName}`)
+    this.listModels() // Refresh the model list
   }
 
   /**

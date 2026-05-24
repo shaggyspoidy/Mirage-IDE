@@ -300,23 +300,21 @@ mirage/
 
 ## Phase 10: Documentation Tab
 
-**Goal**: Build a dedicated Help/Documentation tab with structured content covering Vim motions, Neovim concepts, and LazyVim workflows.
+**Goal**: Build a dedicated Help/Documentation tab with structured content covering Mirage's AI features, model management, and editor workflows.
 
 **Files to create/modify**:
 - `src/renderer/src/components/docs/DocumentationPanel.tsx` — main docs layout with sidebar navigation
 - `src/renderer/src/components/docs/DocSection.tsx` — reusable section renderer (markdown or structured JSX)
-- `src/renderer/src/components/docs/content/vim-motions.ts` — Vim motions reference content
-- `src/renderer/src/components/docs/content/neovim-concepts.ts` — Neovim-specific concepts
-- `src/renderer/src/components/docs/content/lazyvim-workflows.ts` — LazyVim keybindings, plugin management
-- `src/renderer/src/components/docs/content/mirage-features.ts` — Mirage-specific features (AI, themes, etc.)
+- `src/renderer/src/components/docs/content/editor-shortcuts.ts` — Keyboard shortcuts and Monaco editor features
+- `src/renderer/src/components/docs/content/ai-features.ts` — Chat, Inline Autocomplete, context management
+- `src/renderer/src/components/docs/content/model-management.ts` — Local Ollama models, cloud APIs, 1-click install
 - `src/renderer/src/components/docs/SearchDocs.tsx` — search/filter within documentation
 
 **Acceptance Criteria**:
 - [ ] Documentation tab is accessible from the main navigation
-- [ ] Content covers: basic Vim motions, modes, Neovim buffers/windows/tabs, LazyVim keymaps, plugin usage
+- [ ] Content covers: keyboard shortcuts, setting up API keys, installing local Ollama models, using inline autocomplete
 - [ ] Sidebar navigation allows jumping between sections
 - [ ] Search/filter narrows visible content
-- [ ] Content is structured for users coming from GUI editors (progressive complexity)
 - [ ] Documentation renders correctly in all four themes
 
 **Depends on**: Phase 4, Phase 5
@@ -330,7 +328,6 @@ mirage/
 **Files to create/modify**:
 - `electron-builder.yml` — NSIS installer config, portable target, file associations
 - `package.json` — add `build` scripts, `electron-builder` config
-- `scripts/bundle-nvim.js` — script to download and bundle portable Neovim into `resources/`
 - `src/main/services/auto-updater.ts` — electron-updater scaffold (GitHub Releases provider)
 - `resources/icon.ico` — application icon (Windows ICO format)
 - `LICENSE` — open-source license file
@@ -339,7 +336,6 @@ mirage/
 **Acceptance Criteria**:
 - [ ] `npm run build` produces a working NSIS installer for Windows
 - [ ] `npm run build:portable` produces a portable executable
-- [ ] Installer bundles portable Neovim if configured
 - [ ] App icon displays correctly in taskbar, title bar, and installer
 - [ ] Auto-updater scaffold is in place (checks GitHub Releases on launch)
 - [ ] README includes: prerequisites, build instructions, architecture overview

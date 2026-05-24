@@ -235,8 +235,10 @@ export function registerAiHandlers(): void {
   /**
    * Install/pull an Ollama model in the background.
    */
-  ipcMain.handle('ai:install-model', async (_event, modelId: string) => {
-    return await ollamaService.pullModel(modelId)
+  ipcMain.handle('ai:install-model', async (event, modelId: string) => {
+    return await ollamaService.pullModel(modelId, (status, progress) => {
+      event.sender.send('ai:install-progress', { modelId, status, progress })
+    })
   })
 
   /**

@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { X, Download, Terminal, Loader2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { X, Download, Terminal, Loader2, ExternalLink } from 'lucide-react'
 import { useModelStore } from '../../stores/modelStore'
 
 const POPULAR_MODELS = [
@@ -32,8 +32,20 @@ const POPULAR_MODELS = [
 export function MoreModelsPanel(): React.JSX.Element | null {
   const { isModelPanelOpen, setModelPanelOpen, pollModels } = useModelStore()
   const [installing, setInstalling] = useState<string | null>(null)
+  const [progress, setProgress] = useState<{ [modelId: string]: number }>({})
   const [copied, setCopied] = useState<string | null>(null)
   const [customModel, setCustomModel] = useState('')
+
+  useEffect(() => {
+    if (!window.api || !window.api.ai || !window.api.ai.onInstallProgress) return
+    const removeListener = window.api.ai.onInstallProgress((data) => {
+      setProgress(prev => ({
+        ...prev,
+        [data.modelId]: data.progress
+      }))
+    })
+    return () => removeListener()
+  }, [])
 
   if (!isModelPanelOpen) return null
 
@@ -45,13 +57,11 @@ export function MoreModelsPanel(): React.JSX.Element | null {
 
   const handleInstall = async (modelId: string) => {
     setInstalling(modelId)
+    setProgress(prev => ({ ...prev, [modelId]: 0 }))
     try {
-      // We will send this to the main process to execute
-      // If we haven't wired this up yet, it'll just simulate a delay or fail gracefully
       if (window.api && window.api.ai && window.api.ai.installModel) {
         await window.api.ai.installModel(modelId)
       } else {
-        // Fallback simulation for now
         await new Promise(resolve => setTimeout(resolve, 3000))
       }
       pollModels() // Refresh the list
@@ -59,6 +69,11 @@ export function MoreModelsPanel(): React.JSX.Element | null {
       console.error('Failed to install model:', error)
     } finally {
       setInstalling(null)
+      setProgress(prev => {
+        const next = { ...prev }
+        delete next[modelId]
+        return next
+      })
     }
   }
 
@@ -84,31 +99,52 @@ export function MoreModelsPanel(): React.JSX.Element | null {
         <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
           
           {/* Custom Model Input */}
-          <div className="flex flex-col gap-2 p-3 rounded-lg border border-[var(--m-border-primary)] bg-[var(--m-bg-primary)]">
-            <h3 className="text-sm font-medium text-[var(--m-fg-primary)]">Install Custom Model</h3>
-            <p className="text-[11px] text-[var(--m-fg-muted)]">Type any valid Ollama model tag (e.g. <code>deepseek-coder:33b</code>)</p>
-            <div className="flex items-center gap-2 mt-1">
+          <div className="flex flex-col gap-2 p-3 rounded-lg border border-[var(--m-border-primary)] bg-[var(--m-bg-primary)] relative overflow-hidden">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-sm font-medium text-[var(--m-fg-primary)]">Install Custom Model</h3>
+                <p className="text-[11px] text-[var(--m-fg-muted)]">Type any valid Ollama model tag (e.g. <code>deepseek-coder:33b</code>)</p>
+              </div>
+              <a 
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault()
+                  if (window.api && window.api.window) {
+                    window.api.terminal.write('start https://ollama.com/library\r') // Hacky way to open if no openExternal
+                  }
+                }}
+                className="text-[10px] flex items-center gap-1 text-[var(--m-accent-blue)] hover:underline"
+              >
+                Browse Library <ExternalLink size={10} />
+              </a>
+            </div>
+            
+            <div className="flex items-center gap-2 mt-1 z-10 relative">
               <input 
                 type="text" 
                 value={customModel}
                 onChange={e => setCustomModel(e.target.value)}
                 placeholder="Model name..."
                 className="flex-1 h-[28px] bg-[#00000040] border border-[var(--m-border-primary)] rounded px-2 text-xs text-[var(--m-fg-primary)] focus:outline-none focus:border-[var(--m-accent-blue)]"
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && customModel.trim() && installing === null) {
+                    handleInstall(customModel.trim())
+                  }
+                }}
               />
               <button
                 onClick={() => {
                   if (customModel.trim()) {
                     handleInstall(customModel.trim())
-                    setCustomModel('')
                   }
                 }}
                 disabled={!customModel.trim() || installing !== null}
-                className="flex items-center justify-center gap-1.5 h-[28px] px-3 rounded bg-[var(--m-accent-blue)] text-white text-xs font-medium hover:opacity-90 disabled:opacity-50 transition-all shrink-0 w-[90px]"
+                className="flex items-center justify-center gap-1.5 h-[28px] px-3 rounded bg-[var(--m-accent-blue)] text-white text-xs font-medium hover:opacity-90 disabled:opacity-50 transition-all shrink-0 min-w-[90px]"
               >
                 {installing === customModel.trim() ? (
                   <>
                     <Loader2 size={12} className="animate-spin" />
-                    <span>Pulling</span>
+                    <span>{progress[customModel.trim()] !== undefined ? `${progress[customModel.trim()]}%` : 'Pulling'}</span>
                   </>
                 ) : (
                   <>
@@ -118,6 +154,14 @@ export function MoreModelsPanel(): React.JSX.Element | null {
                 )}
               </button>
             </div>
+
+            {/* Progress Bar Background */}
+            {installing === customModel.trim() && progress[customModel.trim()] !== undefined && (
+              <div 
+                className="absolute top-0 left-0 h-full bg-[color-mix(in_srgb,var(--m-accent-blue)_10%,transparent)] transition-all duration-300 pointer-events-none" 
+                style={{ width: `${progress[customModel.trim()]}%` }}
+              />
+            )}
           </div>
 
           <div className="w-full h-px bg-[var(--m-border-primary)]" />
@@ -125,15 +169,24 @@ export function MoreModelsPanel(): React.JSX.Element | null {
           {/* Curated Models */}
           <h3 className="text-sm font-medium text-[var(--m-fg-primary)]">Recommended Models</h3>
           {POPULAR_MODELS.map(model => (
-            <div key={model.id} className="flex flex-col gap-2 p-3 rounded-lg border border-[var(--m-border-primary)] bg-[var(--m-bg-primary)]">
-              <div className="flex justify-between items-start">
+            <div key={model.id} className="flex flex-col gap-2 p-3 rounded-lg border border-[var(--m-border-primary)] bg-[var(--m-bg-primary)] relative overflow-hidden">
+              
+              {/* Progress Bar Background */}
+              {installing === model.id && progress[model.id] !== undefined && (
+                <div 
+                  className="absolute top-0 left-0 h-full bg-[color-mix(in_srgb,var(--m-accent-blue)_10%,transparent)] transition-all duration-300 pointer-events-none" 
+                  style={{ width: `${progress[model.id]}%` }}
+                />
+              )}
+
+              <div className="flex justify-between items-start z-10 relative">
                 <div>
                   <h3 className="text-sm font-medium text-[var(--m-fg-primary)]">{model.name}</h3>
                   <p className="text-xs text-[var(--m-fg-muted)] mt-0.5">{model.description}</p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center gap-2 mt-1 z-10 relative">
                 {/* Command Bar */}
                 <div className="flex-1 flex items-center gap-2 bg-[#00000040] border border-[var(--m-border-primary)] rounded px-2 py-1.5">
                   <Terminal size={12} className="text-[var(--m-fg-subtle)]" />
@@ -152,12 +205,12 @@ export function MoreModelsPanel(): React.JSX.Element | null {
                 <button
                   onClick={() => handleInstall(model.id)}
                   disabled={installing !== null}
-                  className="flex items-center justify-center gap-1.5 h-[28px] px-3 rounded bg-[var(--m-accent-blue)] text-white text-xs font-medium hover:opacity-90 disabled:opacity-50 transition-all shrink-0 w-[90px]"
+                  className="flex items-center justify-center gap-1.5 h-[28px] px-3 rounded bg-[var(--m-accent-blue)] text-white text-xs font-medium hover:opacity-90 disabled:opacity-50 transition-all shrink-0 min-w-[90px]"
                 >
                   {installing === model.id ? (
                     <>
                       <Loader2 size={12} className="animate-spin" />
-                      <span>Pulling</span>
+                      <span>{progress[model.id] !== undefined ? `${progress[model.id]}%` : 'Pulling'}</span>
                     </>
                   ) : installing ? (
                     <span>Wait</span>
@@ -174,8 +227,18 @@ export function MoreModelsPanel(): React.JSX.Element | null {
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-[var(--m-border-primary)] bg-[var(--m-bg-secondary)] text-center text-[11px] text-[var(--m-fg-muted)]">
-          Requires Ollama to be running on your system.
+        <div className="p-3 border-t border-[var(--m-border-primary)] bg-[var(--m-bg-secondary)] text-center text-[11px] text-[var(--m-fg-muted)] flex justify-between px-6">
+          <span>Requires Ollama to be running on your system.</span>
+          <a 
+            href="#" 
+            onClick={(e) => {
+              e.preventDefault()
+              window.api?.terminal?.write('start https://ollama.com\r')
+            }}
+            className="text-[var(--m-accent-blue)] hover:underline"
+          >
+            ollama.com
+          </a>
         </div>
 
       </div>
