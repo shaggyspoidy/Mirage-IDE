@@ -1,11 +1,56 @@
 import { useState, useEffect, useRef } from 'react'
-import { ChevronRight, ChevronDown, File, Folder, FolderOpen, FilePlus, FolderPlus, Pencil, Trash2 } from 'lucide-react'
+import { 
+  ChevronRight, ChevronDown, File, Folder, FolderOpen, 
+  FilePlus, FolderPlus, Pencil, Trash2,
+  FileJson, FileCode2, Image as ImageIcon, Terminal, FileText, Settings, Database
+} from 'lucide-react'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 
 interface FileEntry {
   name: string
   isDirectory: boolean
   path: string
+}
+
+const getFileIcon = (fileName: string, isSelected: boolean) => {
+  const ext = fileName.split('.').pop()?.toLowerCase()
+  const colorClass = isSelected ? 'text-white/80' : 'text-[var(--m-fg-muted)]'
+  
+  switch (ext) {
+    case 'ts':
+    case 'tsx':
+    case 'js':
+    case 'jsx':
+      return <FileCode2 size={14} className={isSelected ? colorClass : 'text-[var(--m-accent-blue)]'} />
+    case 'json':
+      return <FileJson size={14} className={isSelected ? colorClass : 'text-[var(--m-accent-yellow)]'} />
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'svg':
+    case 'gif':
+    case 'ico':
+      return <ImageIcon size={14} className={isSelected ? colorClass : 'text-[var(--m-accent-purple)]'} />
+    case 'sh':
+    case 'bash':
+    case 'ps1':
+      return <Terminal size={14} className={isSelected ? colorClass : 'text-[var(--m-accent-green)]'} />
+    case 'md':
+    case 'txt':
+      return <FileText size={14} className={colorClass} />
+    case 'env':
+    case 'yml':
+    case 'yaml':
+    case 'toml':
+    case 'ini':
+      return <Settings size={14} className={isSelected ? colorClass : 'text-[var(--m-fg-secondary)]'} />
+    case 'sql':
+    case 'db':
+    case 'sqlite':
+      return <Database size={14} className={isSelected ? colorClass : 'text-[var(--m-accent-red)]'} />
+    default:
+      return <File size={14} className={colorClass} />
+  }
 }
 
 /**
@@ -200,6 +245,37 @@ function TreeNode({ entry, depth, onRefreshParent }: { entry: FileEntry; depth: 
   return (
     <div>
       <div 
+        draggable
+        onDragStart={(e) => {
+          e.stopPropagation()
+          e.dataTransfer.setData('text/plain', entry.path)
+          e.dataTransfer.effectAllowed = 'move'
+        }}
+        onDragOver={(e) => {
+          if (entry.isDirectory) {
+            e.preventDefault() // Allow drop
+            e.dataTransfer.dropEffect = 'move'
+          }
+        }}
+        onDrop={async (e) => {
+          if (!entry.isDirectory) return
+          e.preventDefault()
+          e.stopPropagation()
+          const srcPath = e.dataTransfer.getData('text/plain')
+          if (!srcPath || srcPath === entry.path) return
+          
+          const basename = srcPath.split(/[/\\]/).pop()
+          const isWin = /[a-zA-Z]:\\/.test(entry.path) || entry.path.includes('\\')
+          const destPath = `${entry.path}${isWin ? '\\' : '/'}${basename}`
+          
+          try {
+            await window.api.fs.rename(srcPath, destPath)
+            // Instead of complex targeted refresh, a full re-render of root is easiest for cross-folder moves
+            window.dispatchEvent(new CustomEvent('mirage:refresh-file-tree'))
+          } catch (err) {
+            console.error('Move failed:', err)
+          }
+        }}
         onClick={handleToggle}
         onContextMenu={handleContextMenu}
         className={`flex items-center py-1 px-2 cursor-pointer select-none text-xs whitespace-nowrap transition-all duration-150
@@ -208,7 +284,7 @@ function TreeNode({ entry, depth, onRefreshParent }: { entry: FileEntry; depth: 
             : 'text-[var(--m-fg-primary)] hover:bg-[var(--m-hover-bg)]'}`}
         style={{ paddingLeft: `${depth * 12 + 8}px` }}
       >
-        <span className="w-4 h-4 flex items-center justify-center mr-1 shrink-0 opacity-70">
+        <span className="w-4 h-4 flex items-center justify-center mr-1 shrink-0 opacity-70 pointer-events-none">
           {entry.isDirectory ? (
             isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />
           ) : (
@@ -216,11 +292,11 @@ function TreeNode({ entry, depth, onRefreshParent }: { entry: FileEntry; depth: 
           )}
         </span>
         
-        <span className="w-4 h-4 flex items-center justify-center mr-2 shrink-0">
+        <span className="w-4 h-4 flex items-center justify-center mr-2 shrink-0 pointer-events-none">
           {entry.isDirectory ? (
             isOpen ? <FolderOpen size={14} className="text-[var(--m-accent-yellow)]" /> : <Folder size={14} className="text-[var(--m-accent-yellow)]" />
           ) : (
-            <File size={14} className={isSelected ? 'text-white/80' : 'text-[var(--m-fg-muted)]'} />
+            getFileIcon(entry.name, isSelected)
           )}
         </span>
         
@@ -275,6 +351,15 @@ export function FileExplorer(): React.JSX.Element {
 
   useEffect(() => {
     loadRoot()
+    
+    const handleRefresh = () => {
+      loadRoot()
+    }
+    
+    window.addEventListener('mirage:refresh-file-tree', handleRefresh)
+    return () => {
+      window.removeEventListener('mirage:refresh-file-tree', handleRefresh)
+    }
   }, [currentFolder])
 
   if (!currentFolder) {

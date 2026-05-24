@@ -32,7 +32,8 @@ const fsApi = {
   getFileContentAtHead: (folderPath: string, filePath: string) => ipcRenderer.invoke('fs:get-file-content-at-head', folderPath, filePath),
   getGitRemotes: (folderPath: string) => ipcRenderer.invoke('fs:git-get-remotes', folderPath),
   gitPull: (folderPath: string) => ipcRenderer.invoke('fs:git-pull', folderPath),
-  gitPush: (folderPath: string) => ipcRenderer.invoke('fs:git-push', folderPath)
+  gitPush: (folderPath: string) => ipcRenderer.invoke('fs:git-push', folderPath),
+  gitDiff: (folderPath: string) => ipcRenderer.invoke('fs:git-diff', folderPath)
 }
 
 const windowApi = {

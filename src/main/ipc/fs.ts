@@ -357,6 +357,26 @@ export function registerFsHandlers(): void {
   })
 
   /**
+   * Get full git diff (staged and unstaged) for AI commit generation
+   */
+  ipcMain.handle('fs:git-diff', async (_event, folderPath: string) => {
+    return new Promise((resolve, reject) => {
+      const { exec } = require('child_process')
+      // 'git diff HEAD' shows all changes (staged and unstaged) since last commit
+      exec('git diff HEAD', { cwd: folderPath, maxBuffer: 1024 * 1024 * 10 }, (error: any, stdout: string) => {
+        if (error && error.code !== 1) { // code 1 just means there are diffs in some git versions, but we should check stdout
+          // Actually if error but we have stdout, it's fine. 
+          if (!stdout) {
+            reject(new Error(`Git diff failed: ${error.message}`))
+            return
+          }
+        }
+        resolve(stdout)
+      })
+    })
+  })
+
+  /**
    * Check if repository has remote configured
    */
   ipcMain.handle('fs:git-get-remotes', async (_event, folderPath: string) => {

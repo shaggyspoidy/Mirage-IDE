@@ -1,12 +1,51 @@
 import { useState } from 'react'
-import { FilePlus, FileMinus, FileEdit, Check, GitBranch } from 'lucide-react'
+import { FilePlus, FileMinus, FileEdit, Check, GitBranch, Sparkles } from 'lucide-react'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
+import { useModelStore } from '../../stores/modelStore'
 
 export function SourceControl(): React.JSX.Element {
   const { currentFolder, gitChangedFiles, commitChanges, pushChanges, pullChanges, gitHasRemote, setGitDiffFile, refreshGitInfo } = useWorkspaceStore()
   const [commitMessage, setCommitMessage] = useState('')
   const [isCommitting, setIsCommitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const handleAutoCommit = async () => {
+    if (!currentFolder || gitChangedFiles.length === 0) return
+    const modelId = useModelStore.getState().selectedModelId
+    if (!modelId) {
+      setError('Please select an AI model first.')
+      return
+    }
+
+    setIsCommitting(true)
+    setError(null)
+    setCommitMessage('Generating...')
+    try {
+      const diff = await window.api.fs.gitDiff(currentFolder)
+      if (!diff) {
+        setCommitMessage('')
+        setError('No changes detected in diff.')
+        setIsCommitting(false)
+        return
+      }
+      
+      const prompt = `You are an expert developer. Generate a highly concise, professional conventional commit message based on the following git diff. Output ONLY the raw commit message (e.g. "feat: add user login" or "fix: resolve crash on startup") without any markdown formatting, code blocks, prefixes, or explanations.\n\nDiff:\n${diff.substring(0, 5000)}`
+      
+      const response = await window.api.ai.chat(modelId, [{ role: 'user', content: prompt }])
+      
+      if (response && response.content) {
+        setCommitMessage(response.content.trim().replace(/^["']|["']$/g, '').replace(/^```\w*\n?|\n?```$/g, '').trim())
+      } else {
+        setCommitMessage('')
+        setError('AI failed to generate a message.')
+      }
+    } catch (e: any) {
+      setCommitMessage('')
+      setError(e.message || 'Auto-commit failed')
+    } finally {
+      setIsCommitting(false)
+    }
+  }
 
   const handleCommit = async () => {
     if (!commitMessage.trim()) return
@@ -72,13 +111,23 @@ export function SourceControl(): React.JSX.Element {
           }}
         />
         {error && <div className="text-xs text-[var(--m-accent-red)] px-1">{error}</div>}
-        <button
-          onClick={handleCommit}
-          disabled={!commitMessage.trim() || isCommitting || gitChangedFiles.length === 0}
-          className="w-full flex items-center justify-center gap-2 px-3 py-1.5 bg-[var(--m-accent-blue)] text-white rounded text-sm font-medium hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-        >
-          <Check size={16} /> {isCommitting ? 'Committing...' : 'Commit'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleAutoCommit}
+            disabled={isCommitting || gitChangedFiles.length === 0}
+            className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[var(--m-bg-tertiary)] text-[var(--m-fg-primary)] hover:text-[var(--m-accent-blue)] border border-[var(--m-border-primary)] rounded text-sm font-medium hover:bg-[var(--m-hover-bg)] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex-shrink-0"
+            title="Generate AI Commit Message"
+          >
+            <Sparkles size={16} />
+          </button>
+          <button
+            onClick={handleCommit}
+            disabled={!commitMessage.trim() || isCommitting || gitChangedFiles.length === 0}
+            className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-[var(--m-accent-blue)] text-white rounded text-sm font-medium hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            <Check size={16} /> {isCommitting ? 'Committing...' : 'Commit'}
+          </button>
+        </div>
 
         {gitHasRemote && (
           <div className="flex gap-2 mt-1">
