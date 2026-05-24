@@ -12,7 +12,7 @@ import { SearchPanel } from './components/search/SearchPanel'
 import { CommandPalette } from './components/command/CommandPalette'
 import { useWorkspaceStore } from './stores/workspaceStore'
 import { useSettingsStore } from './stores/settingsStore'
-import { Files, GitBranch, Search } from 'lucide-react'
+import { Files, GitBranch, Search, Settings } from 'lucide-react'
 
 // Resizer component for dragging between panes
 function Resizer({ 
@@ -111,12 +111,22 @@ function App(): React.JSX.Element {
     })
   }, [])
 
-  // Global keyboard shortcuts
+  // Ensure theme is applied on initial load
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent): void => {
-      const ctrl = e.ctrlKey || e.metaKey
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
 
+  // Handle global keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const ctrl = e.ctrlKey || e.metaKey
       const key = e.key.toLowerCase()
+
+      // Ctrl+, — Settings
+      if (ctrl && key === ',') {
+        e.preventDefault()
+        useSettingsStore.getState().toggleSettings()
+      }
 
       // Ctrl+Shift+F — Global Search
       if (ctrl && e.shiftKey && key === 'f') {
@@ -209,6 +219,16 @@ function App(): React.JSX.Element {
             {activeSidebarPanel === 'git' && (
               <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[var(--m-accent-blue)] rounded-r-full" />
             )}
+          </button>
+          
+          <div className="flex-1" /> {/* Spacer */}
+          
+          <button
+            onClick={() => useSettingsStore.getState().toggleSettings()}
+            className="p-3 relative group transition-colors rounded-xl text-[var(--m-fg-muted)] hover:text-[var(--m-fg-primary)]"
+            title="Settings (Ctrl+,)"
+          >
+            <Settings size={22} strokeWidth={1.5} />
           </button>
         </div>
 

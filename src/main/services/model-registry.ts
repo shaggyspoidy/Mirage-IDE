@@ -114,7 +114,27 @@ const CLOUD_API_MODELS: ModelInfo[] = [
     contextWindow: 200_000,
     isInstalled: false
   },
+  {
+    id: 'anthropic:claude-opus',
+    name: 'claude-3-opus-20240229',
+    displayName: 'Claude 3 Opus',
+    provider: 'anthropic',
+    tier: 'cloud-api',
+    parameterSize: 'Unknown',
+    contextWindow: 200_000,
+    isInstalled: false
+  },
   // Google
+  {
+    id: 'google:gemini-3.1-pro',
+    name: 'gemini-3.1-pro',
+    displayName: 'Gemini 3.1 Pro',
+    provider: 'google',
+    tier: 'cloud-api',
+    parameterSize: 'Unknown',
+    contextWindow: 2_000_000,
+    isInstalled: false
+  },
   {
     id: 'google:gemini-2.5-pro',
     name: 'gemini-2.5-pro',

@@ -137,49 +137,98 @@ export function registerAiHandlers(): void {
    * Pushes tokens to the renderer via 'ai:stream-chunk' events,
    * then sends 'ai:stream-done' or 'ai:stream-error' when finished.
    */
-  ipcMain.handle('ai:chat-stream', async (event, modelId: string, messages: any[]) => {
-    const model = modelRegistry.getModelById(modelId)
-    if (!model) {
-      event.sender.send('ai:stream-error', `Model ${modelId} not found.`)
-      return
-    }
+  ipcMain.handle('ai:chat-stream', async (event, initialModelId: string, messages: any[]) => {
+    let currentModelId = initialModelId
+    const attemptedModels = new Set<string>()
 
-    if (model.provider === 'ollama') {
-      console.log(`[Ollama] Streaming chat to ${model.name} with ${messages.length} messages.`)
-      await ollamaService.chatStream(
-        model.name,
-        messages,
-        (token) => {
+    const attemptStream = async (): Promise<void> => {
+      attemptedModels.add(currentModelId)
+      const model = modelRegistry.getModelById(currentModelId)
+      
+      if (!model) {
+        event.sender.send('ai:stream-error', `Model ${currentModelId} not found.`)
+        return
+      }
+
+      return new Promise<void>((resolve) => {
+        let hasStreamedChunk = false
+
+        const handleChunk = (token: string) => {
+          hasStreamedChunk = true
           if (!event.sender.isDestroyed()) {
             event.sender.send('ai:stream-chunk', token)
           }
-        },
-        (fullContent) => {
+        }
+
+        const handleDone = (fullContent: string) => {
           if (!event.sender.isDestroyed()) {
             event.sender.send('ai:stream-done', fullContent)
           }
-        },
-        (error) => {
-          if (!event.sender.isDestroyed()) {
-            event.sender.send('ai:stream-error', error)
+          resolve()
+        }
+
+        const handleError = async (error: string) => {
+          if (error.startsWith('[RATE_LIMIT]') && !hasStreamedChunk) {
+            console.log(`[Fallback] Rate limit hit for ${currentModelId}. Searching for fallback...`)
+            
+            // Determine next available model
+            const allModels = modelRegistry.getModels()
+            const keyStatus = await keyManager.getKeyStatus()
+            const isOllamaRunning = ollamaService.getStatus().running
+
+            let nextModelId: string | null = null
+
+            // Fallback hierarchy: OpenAI -> Anthropic -> Google -> Local Ollama
+            const fallbackOrder = ['openai:gpt-4o-mini', 'anthropic:claude-haiku', 'google:gemini-2.5-flash']
+            
+            for (const fallbackId of fallbackOrder) {
+              if (fallbackId !== currentModelId && !attemptedModels.has(fallbackId)) {
+                const fallbackModel = modelRegistry.getModelById(fallbackId)
+                if (fallbackModel && keyStatus[fallbackModel.provider]) {
+                  nextModelId = fallbackId
+                  break
+                }
+              }
+            }
+
+            // If no cloud models, try any local ollama model
+            if (!nextModelId && isOllamaRunning) {
+              const localModels = allModels.filter(m => m.tier === 'local' && !attemptedModels.has(m.id))
+              if (localModels.length > 0) {
+                nextModelId = localModels[0].id
+              }
+            }
+
+            if (nextModelId && !event.sender.isDestroyed()) {
+              console.log(`[Fallback] Switching to ${nextModelId}`)
+              event.sender.send('ai:model-fallback-triggered', nextModelId)
+              currentModelId = nextModelId
+              resolve(attemptStream())
+              return
+            }
           }
+
+          // If we reach here, either it's not a rate limit, or no fallbacks are available
+          if (!event.sender.isDestroyed()) {
+            // Strip the internal [RATE_LIMIT] tag if it still exists
+            const cleanError = error.startsWith('[RATE_LIMIT]') ? error.substring(13).trim() : error
+            event.sender.send('ai:stream-error', cleanError)
+          }
+          resolve()
         }
-      )
-    } else {
-      // Non-Ollama providers: fallback to non-streaming for now
-      try {
-        const client = providerFactory.getClient(model.provider)
-        const response = await client.chat(model.name, messages)
-        if (!event.sender.isDestroyed()) {
-          event.sender.send('ai:stream-chunk', response.content)
-          event.sender.send('ai:stream-done', response.content)
+
+        if (model.provider === 'ollama') {
+          console.log(`[Ollama] Streaming chat to ${model.name} with ${messages.length} messages.`)
+          ollamaService.chatStream(model.name, messages, handleChunk, handleDone, handleError)
+        } else {
+          console.log(`[Cloud API] Streaming chat to ${model.name} via ${model.provider}`)
+          const client = providerFactory.getClient(model.provider)
+          client.chatStream(model.name, messages, handleChunk, handleDone, handleError)
         }
-      } catch (err: any) {
-        if (!event.sender.isDestroyed()) {
-          event.sender.send('ai:stream-error', err.message || 'Unknown error')
-        }
-      }
+      })
     }
+
+    await attemptStream()
   })
 
   /**
@@ -194,5 +243,12 @@ export function registerAiHandlers(): void {
    */
   ipcMain.handle('ai:stop-stream', () => {
     ollamaService.stopStream()
+    try {
+      providerFactory.getClient('openai').stopStream()
+      providerFactory.getClient('anthropic').stopStream()
+      providerFactory.getClient('google').stopStream()
+    } catch (e) {
+      // Ignore if clients aren't initialized
+    }
   })
 }

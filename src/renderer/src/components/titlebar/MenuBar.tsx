@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
+import { useSettingsStore } from '../../stores/settingsStore'
 
 interface MenuItemType {
   label: string
@@ -74,11 +75,9 @@ export function MenuBar(): React.JSX.Element {
             if (path) useWorkspaceStore.getState().saveFile(path)
           }
         },
-        { 
-          label: 'Save All', 
-          shortcut: 'Ctrl+K S', 
-          action: () => useWorkspaceStore.getState().saveAllFiles() 
-        },
+        { label: 'Save All', shortcut: 'Ctrl+K S', action: () => useWorkspaceStore.getState().saveAllFiles() },
+        { divider: true, label: '' },
+        { label: 'Settings', shortcut: 'Ctrl+,', action: () => useSettingsStore.getState().toggleSettings() },
         { divider: true, label: '' },
         { label: 'Exit', action: () => window.api.window.close() }
       ]

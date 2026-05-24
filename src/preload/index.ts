@@ -115,6 +115,15 @@ const aiApi = {
   },
 
   /**
+   * Subscribe to automatic model fallbacks.
+   */
+  onModelFallback: (callback: (newModelId: string) => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, newModelId: string) => callback(newModelId)
+    ipcRenderer.on('ai:model-fallback-triggered', handler)
+    return () => ipcRenderer.removeListener('ai:model-fallback-triggered', handler)
+  },
+
+  /**
    * Install/pull a missing Ollama model.
    */
   installModel: (modelId: string) => ipcRenderer.invoke('ai:install-model', modelId),

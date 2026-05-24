@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Code2, ChevronDown } from 'lucide-react'
 import { useModelStore } from '../../stores/modelStore'
+import { useSettingsStore } from '../../stores/settingsStore'
 import type { ModelInfo } from '../../../../shared/types/model'
 
 /**
@@ -97,8 +98,10 @@ export function ModelSelector(): React.JSX.Element {
   const cloudApiModels = models.filter((m) => m.tier === 'cloud-api')
   const cloudOllamaModels = models.filter((m) => m.tier === 'cloud-ollama')
 
-  // Build flat list of selectable models for keyboard navigation
-  const selectableModels = localModels.filter(() => ollamaStatus === 'connected')
+  const selectableModels = [
+    ...localModels.filter(() => ollamaStatus === 'connected'),
+    ...cloudApiModels
+  ]
 
   // Selected model info
   const selectedModel = models.find((m) => m.id === selectedModelId)
@@ -136,7 +139,21 @@ export function ModelSelector(): React.JSX.Element {
     }
   }
 
-  const handleSelectModel = (model: ModelInfo): void => {
+  const handleSelectModel = async (model: ModelInfo): Promise<void> => {
+    if (model.tier === 'cloud-api') {
+      const { keyStatus, fetchKeyStatus } = useSettingsStore.getState()
+      // Ensure we have the latest status
+      await fetchKeyStatus()
+      const updatedStatus = useSettingsStore.getState().keyStatus
+      
+      if (!updatedStatus[model.provider]) {
+        // Missing key! Close selector and open settings
+        setIsOpen(false)
+        useSettingsStore.setState({ isSettingsOpen: true })
+        return
+      }
+    }
+
     selectModel(model.id)
     setIsOpen(false)
     setFocusedIndex(-1)
@@ -217,6 +234,17 @@ export function ModelSelector(): React.JSX.Element {
             <TierSection
               tier="local"
               models={localModels}
+              ollamaStatus={ollamaStatus}
+              selectedModelId={selectedModelId}
+              focusedIndex={focusedIndex}
+              selectableModels={selectableModels}
+              onSelect={handleSelectModel}
+            />
+
+            {/* ── Cloud API Models ────────────────────────── */}
+            <TierSection
+              tier="cloud-api"
+              models={cloudApiModels}
               ollamaStatus={ollamaStatus}
               selectedModelId={selectedModelId}
               focusedIndex={focusedIndex}

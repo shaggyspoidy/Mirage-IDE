@@ -33,10 +33,18 @@ export function ChatPanel(): React.JSX.Element {
       useContextStore.getState().setGenerating(false)
     })
 
+    const removeFallback = window.api.ai.onModelFallback((newModelId: string) => {
+      useContextStore.getState().addMessage({
+        role: 'system',
+        content: `Rate limit reached. Automatically switched to model: ${newModelId}`
+      })
+    })
+
     return () => {
       removeChunk()
       removeDone()
       removeError()
+      removeFallback()
     }
   }, [])
 

@@ -120,10 +120,15 @@ export const useModelStore = create<ModelState>((set, get) => ({
       })
     })
 
+    const cleanupFallback = window.api.ai.onModelFallback((newModelId: string) => {
+      set({ selectedModelId: newModelId })
+    })
+
     // Return combined cleanup function
     return () => {
       cleanupModels()
       cleanupStatus()
+      cleanupFallback()
     }
   }
 }))
