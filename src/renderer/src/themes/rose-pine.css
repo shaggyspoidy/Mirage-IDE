@@ -1,0 +1,29 @@
+/**
+ * Rosé Pine Theme
+ * https://github.com/rose-pine/rose-pine-theme
+ */
+[data-theme="rose-pine"] {
+  --m-bg-primary: #191724;
+  --m-bg-secondary: #1f1d2e;
+  --m-bg-tertiary: #121016;
+  --m-bg-surface: #26233a;
+  --m-bg-overlay: #312f44;
+
+  --m-fg-primary: #e0def4;
+  --m-fg-secondary: #908caa;
+  --m-fg-muted: #6e6a86;
+  --m-fg-subtle: #524f67;
+
+  --m-border-primary: #26233a;
+  --m-border-secondary: #312f44;
+  --m-border-accent: #9ccfd8;
+
+  --m-accent-blue: #9ccfd8;
+  --m-accent-green: #31748f;
+  --m-accent-red: #eb6f92;
+  --m-accent-yellow: #f6c177;
+  --m-accent-purple: #c4a7e7;
+  --m-accent-pink: #ebbcba;
+  --m-accent-teal: #9ccfd8;
+  --m-accent-peach: #ea9a97;
+}

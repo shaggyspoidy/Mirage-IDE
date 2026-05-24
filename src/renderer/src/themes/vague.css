@@ -1,0 +1,29 @@
+/**
+ * Vague Theme
+ * https://github.com/vague-theme/vague.nvim
+ */
+[data-theme="vague"] {
+  --m-bg-primary: #1e1e20;
+  --m-bg-secondary: #18181a;
+  --m-bg-tertiary: #141415;
+  --m-bg-surface: #28282b;
+  --m-bg-overlay: #36363a;
+
+  --m-fg-primary: #cdcdce;
+  --m-fg-secondary: #a3a3a8;
+  --m-fg-muted: #787882;
+  --m-fg-subtle: #535358;
+
+  --m-border-primary: #28282b;
+  --m-border-secondary: #36363a;
+  --m-border-accent: #b4b4ce;
+
+  --m-accent-blue: #b4b4ce;
+  --m-accent-green: #90a090;
+  --m-accent-red: #d2788c;
+  --m-accent-yellow: #d2a678;
+  --m-accent-purple: #b4a0c8;
+  --m-accent-pink: #d2a6c8;
+  --m-accent-teal: #90b4b4;
+  --m-accent-peach: #d28c78;
+}

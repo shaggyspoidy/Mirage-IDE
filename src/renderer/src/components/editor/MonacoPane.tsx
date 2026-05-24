@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import Editor, { OnMount, DiffEditor } from '@monaco-editor/react'
+import Editor, { OnMount, DiffEditor, useMonaco } from '@monaco-editor/react'
 import { Check, X, ChevronRight, Play } from 'lucide-react'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useSettingsStore } from '../../stores/settingsStore'
@@ -11,6 +11,8 @@ import { initVimMode, VimMode } from 'monaco-vim'
 // A ref to keep track of autocomplete debouncing
 let autocompleteTimeout: ReturnType<typeof setTimeout> | null = null;
 let providerRegistered = false;
+
+import { syncMonacoTheme } from '../../utils/themeToMonaco'
 
 /**
  * MonacoPane — The primary text editor component powering the IDE.
@@ -31,9 +33,21 @@ export function MonacoPane(): React.JSX.Element {
     setGitDiffFile,
     editorInstance
   } = useWorkspaceStore()
-  const { autoSave, vimMode } = useSettingsStore()
+  const { autoSave, vimMode, theme } = useSettingsStore()
   
   const activeFile = openFiles.find(f => f.path === activeFilePath)
+
+  const monaco = useMonaco()
+
+  // Sync Monaco Theme when CSS Theme changes
+  useEffect(() => {
+    if (editorInstance && monaco) {
+      // Small timeout to allow CSS variables to update in the DOM first
+      setTimeout(() => {
+        syncMonacoTheme(monaco)
+      }, 50)
+    }
+  }, [theme, editorInstance, monaco])
 
   // Vim Mode State
   const vimInstanceRef = useRef<any>(null)

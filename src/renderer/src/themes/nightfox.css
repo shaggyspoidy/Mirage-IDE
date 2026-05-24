@@ -1,0 +1,29 @@
+/**
+ * Nightfox Theme
+ * https://github.com/EdenEast/nightfox.nvim
+ */
+[data-theme="nightfox"] {
+  --m-bg-primary: #192330;
+  --m-bg-secondary: #131A24;
+  --m-bg-tertiary: #0e141a;
+  --m-bg-surface: #293e56;
+  --m-bg-overlay: #39506d;
+
+  --m-fg-primary: #cdcecf;
+  --m-fg-secondary: #aeafb0;
+  --m-fg-muted: #71839b;
+  --m-fg-subtle: #475a71;
+
+  --m-border-primary: #293e56;
+  --m-border-secondary: #39506d;
+  --m-border-accent: #719cd6;
+
+  --m-accent-blue: #719cd6;
+  --m-accent-green: #81b29a;
+  --m-accent-red: #c94f6d;
+  --m-accent-yellow: #dbc074;
+  --m-accent-purple: #9d79d6;
+  --m-accent-pink: #d183e8;
+  --m-accent-teal: #73daca;
+  --m-accent-peach: #f4a261;
+}

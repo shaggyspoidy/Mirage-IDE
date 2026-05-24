@@ -1,0 +1,29 @@
+/**
+ * Cyberdream Theme
+ * https://github.com/scottmckendry/cyberdream.nvim
+ */
+[data-theme="cyberdream"] {
+  --m-bg-primary: #16181a;
+  --m-bg-secondary: #131415;
+  --m-bg-tertiary: #0c0d0e;
+  --m-bg-surface: #1e2124;
+  --m-bg-overlay: #3c4048;
+
+  --m-fg-primary: #ffffff;
+  --m-fg-secondary: #9ca3af;
+  --m-fg-muted: #7b8496;
+  --m-fg-subtle: #5c6370;
+
+  --m-border-primary: #1e2124;
+  --m-border-secondary: #3c4048;
+  --m-border-accent: #5ef1ff;
+
+  --m-accent-blue: #5ef1ff;
+  --m-accent-green: #5af78e;
+  --m-accent-red: #ff5e5e;
+  --m-accent-yellow: #f3f99d;
+  --m-accent-purple: #bd5eff;
+  --m-accent-pink: #ff5ea0;
+  --m-accent-teal: #5ef1ff;
+  --m-accent-peach: #ffb86c;
+}

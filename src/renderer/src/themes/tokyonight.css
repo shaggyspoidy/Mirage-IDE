@@ -1,0 +1,29 @@
+/**
+ * TokyoNight Theme
+ * https://github.com/folke/tokyonight.nvim
+ */
+[data-theme="tokyonight"] {
+  --m-bg-primary: #1a1b26;
+  --m-bg-secondary: #16161e;
+  --m-bg-tertiary: #15161e;
+  --m-bg-surface: #292e42;
+  --m-bg-overlay: #414868;
+
+  --m-fg-primary: #c0caf5;
+  --m-fg-secondary: #a9b1d6;
+  --m-fg-muted: #565f89;
+  --m-fg-subtle: #414868;
+
+  --m-border-primary: #292e42;
+  --m-border-secondary: #414868;
+  --m-border-accent: #7aa2f7;
+
+  --m-accent-blue: #7aa2f7;
+  --m-accent-green: #9ece6a;
+  --m-accent-red: #f7768e;
+  --m-accent-yellow: #e0af68;
+  --m-accent-purple: #bb9af7;
+  --m-accent-pink: #ff9e64;
+  --m-accent-teal: #7dcfff;
+  --m-accent-peach: #ffc777;
+}

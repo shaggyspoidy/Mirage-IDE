@@ -1,7 +1,78 @@
-import { useEffect } from 'react'
-import { X } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
+import { X, ChevronDown } from 'lucide-react'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { ApiKeyForm } from './ApiKeyForm'
+
+const THEMES = [
+  { value: "dark", label: "Dark (Default)" },
+  { value: "light", label: "Light" },
+  { value: "tokyonight", label: "TokyoNight" },
+  { value: "aura", label: "Aura" },
+  { value: "nightfox", label: "Nightfox" },
+  { value: "kanagawa", label: "Kanagawa" },
+  { value: "rose-pine", label: "Rosé Pine" },
+  { value: "cyberdream", label: "Cyberdream" },
+  { value: "oxocarbon", label: "Oxocarbon" },
+  { value: "vague", label: "Vague" },
+  { value: "moonfly", label: "Moonfly" },
+  { value: "catppuccin-mocha", label: "Catppuccin Mocha" },
+  { value: "cyberpunk", label: "Cyberpunk" },
+  { value: "obsidian-default", label: "Obsidian Default" },
+  { value: "obsidian-nord", label: "Obsidian Nord" },
+  { value: "dracula", label: "Dracula" },
+  { value: "one-dark-pro", label: "One Dark Pro" },
+  { value: "github-dark", label: "GitHub Dark" }
+]
+
+function ThemeSelect({ value, onChange }: { value: string, onChange: (val: string) => void }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const selectedTheme = THEMES.find(t => t.value === value) || THEMES[0]
+
+  return (
+    <div className="relative w-48" ref={ref}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between bg-[var(--m-bg-primary)] border border-[var(--m-border-primary)] text-[var(--m-fg-primary)] text-sm rounded px-3 py-1.5 focus:outline-none focus:border-[var(--m-accent-blue)]"
+      >
+        <span className="truncate">{selectedTheme.label}</span>
+        <ChevronDown size={14} className="text-[var(--m-fg-muted)] shrink-0 ml-2" />
+      </button>
+      
+      {isOpen && (
+        <div className="absolute top-full left-0 w-full mt-1 bg-[var(--m-bg-surface)] border border-[var(--m-border-primary)] rounded shadow-xl z-[100] max-h-[160px] overflow-y-auto no-scrollbar">
+          {THEMES.map(theme => (
+            <button
+              key={theme.value}
+              onClick={() => {
+                onChange(theme.value)
+                setIsOpen(false)
+              }}
+              className={`w-full text-left px-3 py-1.5 text-sm transition-colors ${
+                value === theme.value 
+                  ? 'bg-[var(--m-accent-blue)] text-white' 
+                  : 'text-[var(--m-fg-primary)] hover:bg-[var(--m-hover-bg)]'
+              }`}
+            >
+              {theme.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export function SettingsPanel(): React.JSX.Element | null {
   const { isSettingsOpen, toggleSettings, fetchKeyStatus, keyStatus, theme, setTheme } = useSettingsStore()
@@ -53,24 +124,7 @@ export function SettingsPanel(): React.JSX.Element | null {
             <div className="flex items-center gap-3">
               <label className="text-sm text-[var(--m-fg-primary)] font-medium">Color Theme</label>
               <div className="relative">
-                <select
-                  value={theme}
-                  onChange={(e) => setTheme(e.target.value)}
-                  className="appearance-none bg-[var(--m-bg-primary)] border border-[var(--m-border-primary)] text-[var(--m-fg-primary)] text-sm rounded px-3 py-1.5 pr-8 focus:outline-none focus:border-[var(--m-accent-blue)]"
-                >
-                  <option value="dark">Dark (Default)</option>
-                  <option value="light">Light</option>
-                  <option value="catppuccin-mocha">Catppuccin Mocha</option>
-                  <option value="cyberpunk">Cyberpunk</option>
-                  <option value="obsidian-default">Obsidian Default</option>
-                  <option value="obsidian-nord">Obsidian Nord</option>
-                  <option value="dracula">Dracula</option>
-                  <option value="one-dark-pro">One Dark Pro</option>
-                  <option value="github-dark">GitHub Dark</option>
-                </select>
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--m-fg-muted)]">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                </div>
+                <ThemeSelect value={theme} onChange={setTheme} />
               </div>
             </div>
           </div>

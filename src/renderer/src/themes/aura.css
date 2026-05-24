@@ -1,0 +1,29 @@
+/**
+ * Aura Theme
+ * https://github.com/daltonmenezes/aura-theme
+ */
+[data-theme="aura"] {
+  --m-bg-primary: #15141b;
+  --m-bg-secondary: #110f14;
+  --m-bg-tertiary: #0b0a0d;
+  --m-bg-surface: #2d2b40;
+  --m-bg-overlay: #4d4b66;
+
+  --m-fg-primary: #edecee;
+  --m-fg-secondary: #e0def4;
+  --m-fg-muted: #6d6875;
+  --m-fg-subtle: #4d4b66;
+
+  --m-border-primary: #2d2b40;
+  --m-border-secondary: #4d4b66;
+  --m-border-accent: #82e2ff;
+
+  --m-accent-blue: #82e2ff;
+  --m-accent-green: #61ffca;
+  --m-accent-red: #ff6767;
+  --m-accent-yellow: #f694ff;
+  --m-accent-purple: #a277ff;
+  --m-accent-pink: #f694ff;
+  --m-accent-teal: #61ffca;
+  --m-accent-peach: #ffca85;
+}

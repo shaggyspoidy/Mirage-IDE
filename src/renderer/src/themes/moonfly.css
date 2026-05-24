@@ -1,0 +1,29 @@
+/**
+ * Moonfly Theme
+ * https://github.com/bluz71/vim-moonfly-colors
+ */
+[data-theme="moonfly"] {
+  --m-bg-primary: #080808;
+  --m-bg-secondary: #000000;
+  --m-bg-tertiary: #121212;
+  --m-bg-surface: #1c1c1c;
+  --m-bg-overlay: #262626;
+
+  --m-fg-primary: #b2ceee;
+  --m-fg-secondary: #9e9e9e;
+  --m-fg-muted: #626262;
+  --m-fg-subtle: #444444;
+
+  --m-border-primary: #1c1c1c;
+  --m-border-secondary: #262626;
+  --m-border-accent: #80a0ff;
+
+  --m-accent-blue: #80a0ff;
+  --m-accent-green: #8cc85f;
+  --m-accent-red: #ff5454;
+  --m-accent-yellow: #e3c78a;
+  --m-accent-purple: #cf87e8;
+  --m-accent-pink: #f09479;
+  --m-accent-teal: #78c2c3;
+  --m-accent-peach: #de935f;
+}

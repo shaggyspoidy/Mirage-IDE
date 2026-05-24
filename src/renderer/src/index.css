@@ -50,6 +50,15 @@
 @import "./themes/dracula.css";
 @import "./themes/one-dark-pro.css";
 @import "./themes/github-dark.css";
+@import "./themes/tokyonight.css";
+@import "./themes/aura.css";
+@import "./themes/nightfox.css";
+@import "./themes/kanagawa.css";
+@import "./themes/rose-pine.css";
+@import "./themes/cyberdream.css";
+@import "./themes/oxocarbon.css";
+@import "./themes/vague.css";
+@import "./themes/moonfly.css";
 
 /* Reset & Global Styles */
 html, body {

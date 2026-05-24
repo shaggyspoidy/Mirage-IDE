@@ -1,0 +1,29 @@
+/**
+ * Oxocarbon Theme
+ * https://github.com/nyoom-engineering/oxocarbon.nvim
+ */
+[data-theme="oxocarbon"] {
+  --m-bg-primary: #161616;
+  --m-bg-secondary: #0a0a0a;
+  --m-bg-tertiary: #000000;
+  --m-bg-surface: #262626;
+  --m-bg-overlay: #393939;
+
+  --m-fg-primary: #f2f4f8;
+  --m-fg-secondary: #c6c8d1;
+  --m-fg-muted: #8d8d8d;
+  --m-fg-subtle: #525252;
+
+  --m-border-primary: #262626;
+  --m-border-secondary: #393939;
+  --m-border-accent: #3ddbd9;
+
+  --m-accent-blue: #78a9ff;
+  --m-accent-green: #42be65;
+  --m-accent-red: #ff7eb6;
+  --m-accent-yellow: #f1c21b;
+  --m-accent-purple: #be95ff;
+  --m-accent-pink: #ff7eb6;
+  --m-accent-teal: #3ddbd9;
+  --m-accent-peach: #ee5396;
+}

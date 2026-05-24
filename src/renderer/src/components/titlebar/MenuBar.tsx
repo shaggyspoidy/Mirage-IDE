@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { Play } from 'lucide-react'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useSettingsStore } from '../../stores/settingsStore'
 
@@ -26,6 +27,61 @@ function triggerEditorAction(actionId: string): void {
     editor.focus()
     editor.trigger('menu', actionId, null)
   }
+}
+
+// Helper to run active file
+const runActiveFile = () => {
+  const activeFile = useWorkspaceStore.getState().activeFilePath
+  if (!activeFile) return
+  
+  const ext = activeFile.split('.').pop()?.toLowerCase()
+  const isWin = navigator.userAgent.toLowerCase().includes('windows')
+  const sep = isWin ? ';' : '&&'
+  
+  let cmd = ''
+  switch (ext) {
+    case 'ts': cmd = `npx tsx "${activeFile}"`; break
+    case 'js': cmd = `node "${activeFile}"`; break
+    case 'py': cmd = `python "${activeFile}"`; break
+    case 'go': cmd = `go run "${activeFile}"`; break
+    case 'rs': {
+      const exe = activeFile.split(/[/\\]/).pop()?.replace('.rs', isWin ? '.exe' : '')
+      cmd = `rustc "${activeFile}" ${sep} .\\${exe}`
+      break
+    }
+    case 'java': {
+      const dir = activeFile.substring(0, Math.max(activeFile.lastIndexOf('/'), activeFile.lastIndexOf('\\')))
+      const filename = activeFile.split(/[/\\]/).pop()
+      const classname = filename?.replace('.java', '')
+      cmd = `cd "${dir}" ${sep} javac "${filename}" ${sep} java "${classname}"`
+      break
+    }
+    case 'cpp':
+    case 'c': {
+      const exe = activeFile.split(/[/\\]/).pop()?.replace(/\.(cpp|c)$/, isWin ? '.exe' : '')
+      const compiler = ext === 'cpp' ? 'g++' : 'gcc'
+      cmd = `${compiler} "${activeFile}" -o "${exe}" ${sep} .\\${exe}`
+      break
+    }
+    default: 
+      cmd = `echo "No default run command configured for .${ext} files. Please compile/run manually."`
+      break
+  }
+
+  const wasOpen = useWorkspaceStore.getState().isTerminalOpen
+  useWorkspaceStore.getState().setTerminalOpen(true)
+  
+  const tryExecute = (attempts = 0) => {
+    const execute = useWorkspaceStore.getState().terminalExecuteCallback
+    if (execute) {
+      if (!wasOpen) setTimeout(() => execute(cmd), 300)
+      else execute(cmd)
+    } else if (attempts < 20) {
+      setTimeout(() => tryExecute(attempts + 1), 50)
+    }
+  }
+  
+  tryExecute()
 }
 
 export function MenuBar(): React.JSX.Element {
@@ -160,36 +216,7 @@ export function MenuBar(): React.JSX.Element {
           if (!isTerminalOpen) toggleTerminal()
         }},
         { divider: true, label: '' },
-        { label: 'Run Active File', action: () => {
-          const path = useWorkspaceStore.getState().activeFilePath
-          if (path && !path.startsWith('untitled')) {
-            const ext = path.split('.').pop()?.toLowerCase()
-            let cmd = ''
-            if (ext === 'py') cmd = `python "${path}"`
-            else if (ext === 'js') cmd = `node "${path}"`
-            else if (ext === 'ts') cmd = `npx tsx "${path}"`
-            else if (ext === 'java') {
-              const dir = path.replace(/\\/g, '/').split('/').slice(0, -1).join('/')
-              const filename = path.replace(/\\/g, '/').split('/').pop()?.replace('.java', '') || ''
-              cmd = `cd "${dir}" && javac "${filename}.java" && java "${filename}"`
-            }
-            else if (ext === 'c') {
-              const out = path.replace(/\\/g, '/').replace('.c', '')
-              cmd = `gcc "${path}" -o "${out}" && "${out}"`
-            }
-            else if (ext === 'cpp' || ext === 'cc' || ext === 'cxx') {
-              const out = path.replace(/\\/g, '/').replace(/\.(cpp|cc|cxx)$/, '')
-              cmd = `g++ "${path}" -o "${out}" && "${out}"`
-            }
-            else if (ext === 'go') cmd = `go run "${path}"`
-            else if (ext === 'rs') cmd = `rustc "${path}" -o "${path.replace('.rs', '')}" && "${path.replace('.rs', '')}"`
-            else if (ext === 'rb') cmd = `ruby "${path}"`
-            else if (ext === 'php') cmd = `php "${path}"`
-            else if (ext === 'sh' || ext === 'bash') cmd = `bash "${path}"`
-            else cmd = `echo "No runner configured for .${ext} files"`
-            useWorkspaceStore.getState().executeCommand(cmd)
-          }
-        }}
+        { label: 'Run Active File', action: runActiveFile }
       ]
     },
     {
@@ -199,7 +226,6 @@ export function MenuBar(): React.JSX.Element {
         { label: 'Keyboard Shortcuts', shortcut: 'Ctrl+K Ctrl+S', action: () => triggerEditorAction('editor.action.quickCommand') },
         { divider: true, label: '' },
         { label: 'About Mirage', action: () => {
-          // A simple, non-blocking about — could be made fancier later
           const editor = useWorkspaceStore.getState().editorInstance
           if (editor) editor.focus()
           alert('Mirage IDE v1.0.0\n\nA next-generation, agent-first IDE built with Electron, React, and Monaco Editor.\n\nhttps://github.com/shaggyspoidy/Mirage-IDE')
@@ -245,6 +271,17 @@ export function MenuBar(): React.JSX.Element {
     <div ref={menuBarRef} className="flex items-center h-full no-drag">
       {menus.map((menu) => (
         <div key={menu.id} className="relative h-full flex items-center">
+          {menu.id === 'help' && (
+            <button
+              onClick={runActiveFile}
+              className="mr-3 ml-2 flex items-center gap-1.5 px-2.5 py-0.5 bg-[var(--m-accent-blue)] hover:bg-blue-500 text-white text-[11px] font-medium rounded shadow-sm transition-colors"
+              title="Run Active File"
+            >
+              <Play size={12} className="fill-current" />
+              <span>Run</span>
+            </button>
+          )}
+
           <button
             onClick={() => handleMenuClick(menu.id)}
             onMouseEnter={() => handleMenuHover(menu.id)}
